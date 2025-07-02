@@ -87,4 +87,4 @@ def safe_import_audio_libs():
     return audio_libs
 
 # Initialize audio libraries safely
-AUDIO_LIBS = safe_import_audio_libs())
+AUDIO_LIBS = safe_import_audio_libs()

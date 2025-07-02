@@ -20,7 +20,7 @@ try:
     HAS_SOUNDFILE = True
 except ImportError:
     HAS_SOUNDFILE = False
-    print("Warning: soundfile not available - audio features limited") as sf
+    print("Warning: soundfile not available - audio features limited")
 from pydub import AudioSegment
 from gtts import gTTS
 
