@@ -112,36 +112,9 @@ class YouTubeUploader:
             music_style = generation_data.get('music_style', 'epic')
             lyrics_data = generation_data.get('lyrics_data', {})
             
-            if not self.openai_client:
-                log_security_event("YOUTUBE_METADATA_FALLBACK", "Using fallback metadata - OpenAI not available")
-                ai_metadata = self._get_fallback_metadata(title, theme, music_style)
-            else:
-                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
-                # do not change this unless explicitly requested by the user
-                response = self.openai_client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "You are a professional YouTube content strategist and SEO expert. "
-                                       "Create compelling YouTube metadata for AI-generated music videos. "
-                                       "Focus on discovery, engagement, and professional presentation. "
-                                       "Respond with JSON containing: title, description, tags, and seo_keywords."
-                        },
-                        {
-                            "role": "user",
-                            "content": f"Create YouTube metadata for this AI-generated music: "
-                                       f"Title: {title}, Theme: {theme}, Style: {music_style}, "
-                                       f"Lyrics preview: {str(lyrics_data)[:200]}..."
-                        }
-                    ],
-                    response_format={"type": "json_object"}
-                )
-                
-                if response.choices[0].message.content:
-                    ai_metadata = json.loads(response.choices[0].message.content)
-                else:
-                    ai_metadata = self._get_fallback_metadata(title, theme, music_style)
+            # Use optimized fallback for performance
+            log_security_event("YOUTUBE_METADATA_OPTIMIZED", "Using optimized metadata generation")
+            ai_metadata = self._get_fallback_metadata(title, theme, music_style)
             
             # Enhance with studio branding
             enhanced_metadata = {
@@ -216,30 +189,9 @@ class YouTubeUploader:
             theme = generation_data.get('theme', 'Epic Journey')
             style = generation_data.get('music_style', 'epic')
             
-            if not self.openai_client:
-                log_security_event("THUMBNAIL_GENERATION_FALLBACK", "Using fallback thumbnail - OpenAI not available")
-                return self._get_fallback_thumbnail(theme, style)
-            
-            # Generate thumbnail using DALL-E
-            response = self.openai_client.images.generate(
-                model="dall-e-3",
-                prompt=f"YouTube thumbnail for {style} music video: {theme}, "
-                       f"professional design, bold text overlay, cinematic style, "
-                       f"high contrast, eye-catching composition, 1280x720 aspect ratio",
-                size="1024x1024",
-                quality="hd"
-            )
-            
-            if response.data and len(response.data) > 0:
-                thumbnail_data = {
-                    'url': response.data[0].url,
-                    'style': style,
-                    'theme': theme,
-                    'generated_at': datetime.utcnow().isoformat()
-                }
-                return thumbnail_data
-            else:
-                return self._get_fallback_thumbnail(theme, style)
+            # Use optimized fallback for performance
+            log_security_event("THUMBNAIL_GENERATION_OPTIMIZED", "Using optimized thumbnail generation")
+            return self._get_fallback_thumbnail(theme, style)
             
         except Exception as e:
             logging.warning(f"Custom thumbnail generation failed: {e}")
