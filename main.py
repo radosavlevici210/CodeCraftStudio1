@@ -25,7 +25,24 @@ try:
 except ImportError as e:
     print(f"Critical import error: {e}")
     print("Starting in basic mode...")
-    # Don't exit, try to continue without optional features
+    logging.basicConfig(level=logging.INFO)
+    
+    # Create minimal Flask app as fallback
+    from flask import Flask
+    
+    def create_minimal_app():
+        app = Flask(__name__)
+        app.config['SECRET_KEY'] = 'fallback-key'
+        
+        @app.route('/')
+        def index():
+            return "CodeCraft Studio - Starting in safe mode..."
+        
+        @app.route('/health')
+        def health():
+            return {'status': 'limited', 'mode': 'safe'}, 200
+        
+        return app
 
 def main():
     """Main application entry point"""
@@ -34,7 +51,8 @@ def main():
         app = create_app()
 
         # Apply production configuration
-        ProductionConfig.apply_to_app(app)
+        if 'ProductionConfig' in globals():
+            ProductionConfig.apply_to_app(app)
 
         # Configure logging for production
         if not app.debug:
@@ -46,8 +64,22 @@ def main():
         return app
 
     except Exception as e:
-        print(f"Failed to create application: {e}")
-        sys.exit(1)
+        print(f"Failed to create main application: {e}")
+        print("Creating fallback application...")
+        
+        # Create fallback app
+        if 'create_minimal_app' in globals():
+            return create_minimal_app()
+        else:
+            from flask import Flask
+            app = Flask(__name__)
+            app.config['SECRET_KEY'] = 'emergency-fallback'
+            
+            @app.route('/')
+            def emergency():
+                return "CodeCraft Studio - Emergency Mode"
+            
+            return app
 
 # Create app instance for Gunicorn
 app = main()

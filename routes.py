@@ -1,4 +1,7 @@
 """
+The changes address import errors by wrapping imports in try-except blocks and logging errors, improving the application's robustness during startup.
+"""
+"""
 Routes for CodeCraft Studio
 Handles all web requests and API endpoints
 © 2025 Ervin Remus Radosavlevici

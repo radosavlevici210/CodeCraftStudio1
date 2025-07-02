@@ -9,7 +9,7 @@ deploymentTarget = "autoscale"
 run = ["sh", "-c", "gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 30 main:app"]
 
 [workflows]
-runButton = "Production Start"
+runButton = "Production Safe Start"
 
 [[workflows.workflow]]
 name = "Project"
@@ -41,6 +41,27 @@ args = "python -m pip install --upgrade pip"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "pip install -r requirements.txt"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[[workflows.workflow]]
+name = "Production Safe Start"
+author = 43637184
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m pip install --upgrade pip"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pip install -r requirements.txt --timeout=300"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -c \"import soundfile; print('soundfile OK')\""
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
