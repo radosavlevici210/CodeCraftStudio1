@@ -5,7 +5,7 @@ Handles all web requests and API endpoints
 """
 
 from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session, Blueprint
-from app import app, db
+from app import db
 from models import Generation, SecurityLog
 from ai_agent import InvictusAIAgent
 from youtube_uploader import YouTubeUploader
@@ -404,5 +404,4 @@ def inject_global_vars():
         'license': 'Radosavlevici Game License v1.0'
     }
 
-# Register the blueprint
-app.register_blueprint(main_bp)
+# Blueprint will be registered in app.py

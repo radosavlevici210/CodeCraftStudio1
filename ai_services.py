@@ -7,23 +7,32 @@ Handles OpenAI integration for lyrics generation and music enhancement
 import os
 import json
 import logging
-from openai import OpenAI
+from datetime import datetime
 from security.rados_security import log_security_event
 
-# the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-# do not change this unless explicitly requested by the user
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-if OPENAI_API_KEY:
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
-else:
-    openai_client = None
-    logging.warning("OpenAI API key not found. AI features will be limited.")
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    log_security_event("OPENAI_IMPORT_WARNING", "OpenAI library not available", "WARNING")
 
-def generate_lyrics(theme, title):
-    """Generate lyrics using OpenAI API"""
-    try:
-        # Enhanced prompt for better lyric generation
-        prompt = f"""Create powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
+class AIServices:
+    # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
+    # do not change this unless explicitly requested by the user
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+    openai_client = None
+    if OPENAI_API_KEY:
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
+    else:
+        logging.warning("OpenAI API key not found. AI features will be limited.")
+
+    @staticmethod
+    def generate_lyrics(theme, title):
+        """Generate lyrics using OpenAI API"""
+        try:
+            # Enhanced prompt for better lyric generation
+            prompt = f"""Create powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
 
 Generate lyrics that are:
 - Epic and emotionally resonant
@@ -49,94 +58,96 @@ Please provide the lyrics in this JSON format:
     "full_text": "complete song lyrics as one text"
 }}"""
 
-        if not openai_client:
-            return _get_fallback_lyrics(theme, title)
-        
-        client = openai_client
+            if not AIServices.openai_client:
+                return AIServices._get_fallback_lyrics(theme, title)
 
-        # Add timeout to prevent worker timeouts
-        import signal
+            client = AIServices.openai_client
 
-        def timeout_handler(signum, frame):
-            raise TimeoutError("OpenAI API call timed out")
+            # Add timeout to prevent worker timeouts
+            import signal
 
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(15)  # 15 second timeout for lyrics
+            def timeout_handler(signum, frame):
+                raise TimeoutError("OpenAI API call timed out")
 
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(15)  # 15 second timeout for lyrics
+
+            try:
+                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+                # do not change this unless explicitly requested by the user
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a master lyricist who creates epic, cinematic song lyrics. Always respond with valid JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    response_format={"type": "json_object"},
+                    timeout=12.0  # 12 second timeout
+                )
+
+                result = json.loads(response.choices[0].message.content)
+                signal.alarm(0)  # Cancel timeout
+                log_security_event("LYRICS_GENERATED", f"Theme: {theme}, Title: {title}")
+
+                return result
+
+            except (TimeoutError, Exception) as api_error:
+                signal.alarm(0)  # Cancel timeout
+                logging.error(f"OpenAI lyrics generation failed: {api_error}")
+                return AIServices._get_fallback_lyrics(theme, title)
+
+            finally:
+                signal.alarm(0)  # Ensure timeout is always cancelled
+
+        except Exception as e:
+            log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
+            return AIServices._get_fallback_lyrics(theme, title)
+
+    @staticmethod
+    def _get_fallback_lyrics(theme, title):
+        """Return fallback lyrics when AI is not available"""
+        return {
+            "title": title,
+            "theme": theme,
+            "full_text": f"Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain, Our hearts ablaze, our spirits soar, We are the champions, forevermore.",
+            "verses": [
+                {
+                    "type": "verse",
+                    "lyrics": "Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain",
+                    "timing": "0:00-0:30"
+                },
+                {
+                    "type": "chorus",
+                    "lyrics": "Our hearts ablaze, our spirits soar, We are the champions, forevermore",
+                    "timing": "0:30-1:00"
+                }
+            ],
+            "structure": ["verse", "chorus"],
+            "mood": "heroic",
+            "latin_phrases": ["Invictus Aeternum"]
+        }
+
+    @staticmethod
+    def enhance_music_prompt(lyrics_data, music_style):
+        """Enhance music generation prompt using AI"""
         try:
-            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
-            # do not change this unless explicitly requested by the user
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a master lyricist who creates epic, cinematic song lyrics. Always respond with valid JSON."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"},
-                timeout=12.0  # 12 second timeout
-            )
+            lyrics_text = lyrics_data.get('full_text', '')
+            mood = lyrics_data.get('mood', 'heroic')
 
-            result = json.loads(response.choices[0].message.content)
-            signal.alarm(0)  # Cancel timeout
-            log_security_event("LYRICS_GENERATED", f"Theme: {theme}, Title: {title}")
-
-            return result
-
-        except (TimeoutError, Exception) as api_error:
-            signal.alarm(0)  # Cancel timeout
-            logging.error(f"OpenAI lyrics generation failed: {api_error}")
-            return _get_fallback_lyrics(theme, title)
-
-        finally:
-            signal.alarm(0)  # Ensure timeout is always cancelled
-
-    except Exception as e:
-        log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
-        return _get_fallback_lyrics(theme, title)
-
-def _get_fallback_lyrics(theme, title):
-    """Return fallback lyrics when AI is not available"""
-    return {
-        "title": title,
-        "theme": theme,
-        "full_text": f"Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain, Our hearts ablaze, our spirits soar, We are the champions, forevermore.",
-        "verses": [
-            {
-                "type": "verse",
-                "lyrics": "Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain",
-                "timing": "0:00-0:30"
-            },
-            {
-                "type": "chorus",
-                "lyrics": "Our hearts ablaze, our spirits soar, We are the champions, forevermore",
-                "timing": "0:30-1:00"
+            # Use optimized fallback to prevent blocking
+            log_security_event("MUSIC_ENHANCEMENT_FALLBACK", "Using optimized enhancement for performance")
+            return {
+                "instrumentation": f"Full orchestra with {music_style} arrangement",
+                "tempo": "Moderate to fast",
+                "effects": "Reverb, chorus, orchestral processing",
+                "notes": f"Professional {music_style} production"
             }
-        ],
-        "structure": ["verse", "chorus"],
-        "mood": "heroic",
-        "latin_phrases": ["Invictus Aeternum"]
-    }
 
-def enhance_music_prompt(lyrics_data, music_style):
-    """Enhance music generation prompt using AI"""
-    try:
-        lyrics_text = lyrics_data.get('full_text', '')
-        mood = lyrics_data.get('mood', 'heroic')
-
-        # Use optimized fallback to prevent blocking
-        log_security_event("MUSIC_ENHANCEMENT_FALLBACK", "Using optimized enhancement for performance")
-        return {
-            "instrumentation": f"Full orchestra with {music_style} arrangement",
-            "tempo": "Moderate to fast",
-            "effects": "Reverb, chorus, orchestral processing",
-            "notes": f"Professional {music_style} production"
-        }
-
-    except Exception as e:
-        log_security_event("MUSIC_ENHANCEMENT_ERROR", str(e), "ERROR")
-        return {
-            "instrumentation": f"Full orchestra with {music_style} arrangement",
-            "tempo": "Moderate to fast",
-            "effects": "Reverb, chorus, orchestral processing",
-            "notes": f"Professional {music_style} production"
-        }
+        except Exception as e:
+            log_security_event("MUSIC_ENHANCEMENT_ERROR", str(e), "ERROR")
+            return {
+                "instrumentation": f"Full orchestra with {music_style} arrangement",
+                "tempo": "Moderate to fast",
+                "effects": "Reverb, chorus, orchestral processing",
+                "notes": f"Professional {music_style} production"
+            }

@@ -7,7 +7,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import time
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 class Base(DeclarativeBase):
     pass
@@ -87,3 +87,6 @@ def create_app():
             app.logger.error(f"Database initialization failed: {e}")
 
     return app
+
+# Create the app instance at module level for Gunicorn
+app = create_app()
