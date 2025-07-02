@@ -791,4 +791,7 @@ class VoiceTrainingSystem:
             'base_pitch': analysis['fundamental_frequency'],
             'pitch_range': analysis['pitch_variance'],
             'speaking_rate': analysis['speaking_rate'],
-            'tone_characteristics':
+            'tone_characteristics': analysis.get('tone', 'neutral'),
+            'emotional_range': analysis.get('emotional_range', 'moderate'),
+            'pronunciation_clarity': analysis.get('clarity', 85.0)
+        }

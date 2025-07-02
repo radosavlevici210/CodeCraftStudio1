@@ -23,7 +23,7 @@ def create_app():
     except ImportError:
         # Fallback configuration
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-key-change-in-production')
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/codecraft_studio.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///instance/codecraft_studio.db')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Initialize extensions with app
@@ -44,9 +44,22 @@ def create_app():
     # Create database tables
     with app.app_context():
         try:
-            # Ensure instance directory exists
-            os.makedirs(os.path.dirname(app.config['SQLALCHEMY_DATABASE_URI'].replace('sqlite:///', '')), exist_ok=True)
+            # Import models to ensure they are registered
+            import models
+            
+            # Ensure instance directory exists for SQLite
+            db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+            if db_uri.startswith('sqlite:///'):
+                # Ensure instance directory exists
+                os.makedirs('instance', exist_ok=True)
+                # Test if we can create the database file
+                import sqlite3
+                test_db_path = 'instance/codecraft_studio.db'
+                conn = sqlite3.connect(test_db_path)
+                conn.close()
+            
             db.create_all()
+            logging.info("Database initialized successfully")
         except Exception as e:
             logging.error(f"Database initialization error: {e}")
     

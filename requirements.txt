@@ -32,3 +32,5 @@ cffi==1.16.0
 pycparser==2.21
 moviepy
 soundfile
+flask-sqlalchemy
+pillow

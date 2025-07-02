@@ -46,31 +46,25 @@ except ImportError as e:
 
 def main():
     """Main application entry point"""
+    print("Loading CodeCraft Studio in stable mode...")
+    
+    # Use the simple app as primary for now to ensure stability
     try:
-        # Create Flask app
-        app = create_app()
-
-        # Apply production configuration
-        if 'ProductionConfig' in globals():
-            ProductionConfig.apply_to_app(app)
-
-        # Configure logging for production
-        if not app.debug:
-            logging.basicConfig(
-                level=logging.INFO,
-                format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-            )
-
+        from simple_app import app
+        print("Simple app loaded successfully")
         return app
-
-    except Exception as e:
-        print(f"Failed to create main application: {e}")
-        print("Creating fallback application...")
+    except ImportError as e:
+        print(f"Simple app failed to load: {e}")
         
-        # Create fallback app
-        if 'create_minimal_app' in globals():
-            return create_minimal_app()
-        else:
+        # Try the full app as backup
+        try:
+            app = create_app()
+            print("Full app loaded as backup")
+            return app
+        except Exception as full_e:
+            print(f"Full app also failed: {full_e}")
+            
+            # Last resort emergency app
             from flask import Flask
             app = Flask(__name__)
             app.config['SECRET_KEY'] = 'emergency-fallback'
@@ -78,6 +72,10 @@ def main():
             @app.route('/')
             def emergency():
                 return "CodeCraft Studio - Emergency Mode"
+            
+            @app.route('/health')
+            def health():
+                return {'status': 'emergency', 'mode': 'minimal'}
             
             return app
 

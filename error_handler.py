@@ -1,7 +1,7 @@
 
 import logging
 import traceback
-from flask import jsonify, render_template
+from flask import jsonify, render_template, request
 from datetime import datetime
 
 class ProductionErrorHandler:
