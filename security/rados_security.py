@@ -1,99 +1,168 @@
+
 """
 RADOS Quantum Enforcement Policy v2.7
-Security and logging system for CodeCraft Studio
+Advanced security and protection system for CodeCraft Studio
 © 2025 Ervin Remus Radosavlevici
 """
 
+import os
+import hashlib
 import logging
 from datetime import datetime
-from flask import request
-from models import SecurityLog
-from app import db
+from flask import request, session
 
-def log_security_event(event_type, event_data="", severity="INFO"):
-    """Log security events to database and file"""
+# Security configuration
+SECURITY_CONFIG = {
+    'max_requests_per_minute': 60,
+    'blocked_extensions': ['.exe', '.bat', '.cmd', '.sh'],
+    'max_file_size': 50 * 1024 * 1024,  # 50MB
+    'require_https': False,  # Set to True in production
+    'session_timeout': 3600  # 1 hour
+}
+
+# Global security tracking
+security_state = {
+    'blocked_ips': set(),
+    'suspicious_patterns': [],
+    'request_counts': {},
+    'security_events': []
+}
+
+def log_security_event(event_type, description, severity="INFO"):
+    """Log security events with comprehensive tracking"""
     try:
-        # Get request info if available
-        ip_address = None
-        user_agent = None
+        # Ensure logs directory exists
+        os.makedirs('logs', exist_ok=True)
         
-        if request:
-            ip_address = request.remote_addr
-            user_agent = request.headers.get('User-Agent', '')
+        # Create security event
+        event = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'event_type': event_type,
+            'description': description,
+            'severity': severity,
+            'ip_address': getattr(request, 'remote_addr', 'unknown') if request else 'system',
+            'user_agent': getattr(request, 'user_agent', 'unknown') if request else 'system'
+        }
         
-        # Create database record
-        log_entry = SecurityLog(
-            event_type=event_type,
-            event_data=str(event_data),
-            severity=severity,
-            ip_address=ip_address,
-            user_agent=user_agent
-        )
+        # Add to global tracking
+        security_state['security_events'].append(event)
         
-        db.session.add(log_entry)
-        db.session.commit()
+        # Keep only last 1000 events
+        if len(security_state['security_events']) > 1000:
+            security_state['security_events'] = security_state['security_events'][-1000:]
         
-        # Also log to file
-        timestamp = datetime.utcnow().isoformat()
-        log_message = f"[{timestamp}] {severity}: {event_type} - {event_data}"
+        # Log to file
+        log_file = f"logs/security_{datetime.now().strftime('%Y%m%d')}.log"
+        with open(log_file, 'a') as f:
+            f.write(f"{event['timestamp']} - {severity} - {event_type}: {description}\n")
         
+        # Log to application logger
         if severity == "ERROR":
-            logging.error(log_message)
+            logging.error(f"SECURITY: {event_type} - {description}")
         elif severity == "WARNING":
-            logging.warning(log_message)
+            logging.warning(f"SECURITY: {event_type} - {description}")
+        elif severity == "CRITICAL":
+            logging.critical(f"SECURITY: {event_type} - {description}")
         else:
-            logging.info(log_message)
+            logging.info(f"SECURITY: {event_type} - {description}")
             
     except Exception as e:
         logging.error(f"Failed to log security event: {e}")
 
 def enforce_rados_protection():
     """Enforce RADOS protection policies"""
-    log_security_event("RADOS_PROTECTION_CHECK", "System protection verification")
-    
-    # Check for unauthorized access patterns
-    if request and request.method == 'POST':
-        log_security_event("API_ACCESS", f"POST request to {request.endpoint}")
-    
-    return True
-
-def watermark_content(content_type, file_path):
-    """Add watermark protection to generated content"""
-    watermark_data = {
-        'creator': 'Ervin Remus Radosavlevici',
-        'license': 'Radosavlevici Game License v1.0',
-        'timestamp': datetime.utcnow().isoformat(),
-        'protection': 'RADOS Quantum Enforcement Policy v2.7',
-        'warning': 'UNAUTHORIZED USAGE IS PROHIBITED - Content protected by digital blessing/curse system'
-    }
-    
-    # Enhanced protection for audio content
-    if content_type == "VOICE_AUDIO":
-        log_security_event("AUDIO_PROTECTION_APPLIED", 
-                          f"Sacred audio protection applied to {file_path} - "
-                          f"Blessed for honest users, cursed for thieves")
-    
-    log_security_event("CONTENT_WATERMARKED", f"{content_type}: {file_path}")
-    return watermark_data
-
-def detect_unauthorized_access():
-    """Detect potential unauthorized access or content theft"""
     try:
-        if request:
-            suspicious_patterns = [
-                'bot', 'scraper', 'crawler', 'spider', 'automated'
-            ]
-            
-            user_agent = request.headers.get('User-Agent', '').lower()
-            for pattern in suspicious_patterns:
-                if pattern in user_agent:
-                    log_security_event("SUSPICIOUS_ACCESS", 
-                                     f"Potential unauthorized bot detected: {user_agent}",
-                                     "WARNING")
-                    return True
+        if not request:
+            return True
         
-        return False
+        # Check IP blocking
+        client_ip = request.remote_addr
+        if client_ip in security_state['blocked_ips']:
+            log_security_event("BLOCKED_IP_ACCESS", f"Blocked IP attempted access: {client_ip}", "WARNING")
+            return False
+        
+        # Rate limiting
+        current_time = datetime.utcnow()
+        if client_ip not in security_state['request_counts']:
+            security_state['request_counts'][client_ip] = []
+        
+        # Clean old requests (older than 1 minute)
+        security_state['request_counts'][client_ip] = [
+            req_time for req_time in security_state['request_counts'][client_ip]
+            if (current_time - req_time).total_seconds() < 60
+        ]
+        
+        # Check rate limit
+        if len(security_state['request_counts'][client_ip]) >= SECURITY_CONFIG['max_requests_per_minute']:
+            log_security_event("RATE_LIMIT_EXCEEDED", f"IP {client_ip} exceeded rate limit", "WARNING")
+            security_state['blocked_ips'].add(client_ip)
+            return False
+        
+        # Add current request
+        security_state['request_counts'][client_ip].append(current_time)
+        
+        return True
         
     except Exception as e:
-        log_security_event("SECURITY_CHECK_ERROR", str(e), "ERROR")
-        return False
+        log_security_event("PROTECTION_ERROR", str(e), "ERROR")
+        return True  # Allow on error to prevent blocking legitimate users
+
+def watermark_content(content, content_type="text"):
+    """Add watermark to generated content"""
+    try:
+        watermark = "© 2025 Ervin Remus Radosavlevici - CodeCraft Studio"
+        
+        if content_type == "text":
+            return f"{content}\n\n{watermark}"
+        elif content_type == "json":
+            if isinstance(content, dict):
+                content['watermark'] = watermark
+                content['license'] = "Radosavlevici Game License v1.0"
+            return content
+        
+        return content
+        
+    except Exception as e:
+        log_security_event("WATERMARK_ERROR", str(e), "WARNING")
+        return content
+
+def generate_secure_hash(data):
+    """Generate secure hash for data integrity"""
+    try:
+        if isinstance(data, str):
+            data = data.encode('utf-8')
+        return hashlib.sha256(data).hexdigest()
+    except Exception as e:
+        log_security_event("HASH_ERROR", str(e), "WARNING")
+        return None
+
+def validate_file_upload(filename, file_size):
+    """Validate file uploads for security"""
+    try:
+        # Check file extension
+        _, ext = os.path.splitext(filename)
+        if ext.lower() in SECURITY_CONFIG['blocked_extensions']:
+            log_security_event("BLOCKED_FILE_EXTENSION", f"Blocked file: {filename}", "WARNING")
+            return False, "File type not allowed"
+        
+        # Check file size
+        if file_size > SECURITY_CONFIG['max_file_size']:
+            log_security_event("FILE_SIZE_EXCEEDED", f"Large file rejected: {filename} ({file_size} bytes)", "WARNING")
+            return False, "File too large"
+        
+        return True, "File validated"
+        
+    except Exception as e:
+        log_security_event("FILE_VALIDATION_ERROR", str(e), "ERROR")
+        return False, "Validation failed"
+
+def get_security_status():
+    """Get current security status"""
+    return {
+        'blocked_ips_count': len(security_state['blocked_ips']),
+        'security_events_count': len(security_state['security_events']),
+        'suspicious_patterns_count': len(security_state['suspicious_patterns']),
+        'active_requests': len(security_state['request_counts']),
+        'protection_active': True,
+        'last_updated': datetime.utcnow().isoformat()
+    }

@@ -192,19 +192,6 @@ class HealthMonitor:
 
 # Global health monitor instance
 health_monitor = HealthMonitor()
-"""
-Health Monitor for CodeCraft Studio
-Monitors system health and performance metrics
-© 2025 Ervin Remus Radosavlevici
-"""
-
-import psutil
-import os
-import logging
-from datetime import datetime
-from security.rados_security import log_security_event
-
-class HealthMonitor:
     """System health monitoring"""
     
     def __init__(self):

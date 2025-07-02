@@ -1,98 +1,104 @@
 
 """
-Comprehensive Error Handling for CodeCraft Studio
-Production-ready error handling and recovery
+Production Error Handler for CodeCraft Studio
+Comprehensive error handling and logging
 © 2025 Ervin Remus Radosavlevici
 """
 
+import os
 import logging
-import traceback
 from datetime import datetime
-from flask import request, jsonify, render_template
+from flask import render_template, request, jsonify
 from security.rados_security import log_security_event
 
-class ErrorHandler:
-    """Centralized error handling system"""
+class ProductionErrorHandler:
+    """Production-ready error handling system"""
     
-    def __init__(self, app=None):
-        self.app = app
-        if app:
-            self.init_app(app)
+    def __init__(self):
+        self.setup_logging()
+    
+    def setup_logging(self):
+        """Setup production logging configuration"""
+        os.makedirs('logs', exist_ok=True)
+        
+        # Configure logging format
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler('logs/application.log'),
+                logging.StreamHandler()
+            ]
+        )
     
     def init_app(self, app):
-        """Initialize error handling for Flask app"""
-        app.register_error_handler(404, self.handle_404)
-        app.register_error_handler(500, self.handle_500)
-        app.register_error_handler(TimeoutError, self.handle_timeout)
-        app.register_error_handler(Exception, self.handle_general_error)
-    
-    def handle_404(self, error):
-        """Handle 404 errors"""
-        log_security_event("404_ERROR", f"Path: {request.path}")
+        """Initialize error handlers for Flask app"""
         
-        if request.path.startswith('/api/'):
-            return jsonify({
-                'error': 'Not found',
-                'message': 'The requested resource was not found'
-            }), 404
+        @app.errorhandler(400)
+        def bad_request(error):
+            log_security_event("400_ERROR", f"Bad request: {request.url}")
+            if request.is_json:
+                return jsonify({'error': 'Bad request'}), 400
+            return render_template('error.html', 
+                                 error_code=400, 
+                                 error_message="Bad request"), 400
         
-        return render_template('error.html', 
-                             error_code=404,
-                             error_message="Page not found"), 404
-    
-    def handle_500(self, error):
-        """Handle 500 errors"""
-        error_id = f"error_{int(datetime.utcnow().timestamp())}"
-        log_security_event("500_ERROR", f"Error ID: {error_id}, Details: {str(error)}", "ERROR")
+        @app.errorhandler(401)
+        def unauthorized(error):
+            log_security_event("401_ERROR", f"Unauthorized: {request.url}")
+            if request.is_json:
+                return jsonify({'error': 'Unauthorized'}), 401
+            return render_template('error.html', 
+                                 error_code=401, 
+                                 error_message="Unauthorized access"), 401
         
-        # Log full traceback for debugging
-        logging.error(f"500 Error {error_id}: {traceback.format_exc()}")
+        @app.errorhandler(403)
+        def forbidden(error):
+            log_security_event("403_ERROR", f"Forbidden: {request.url}")
+            if request.is_json:
+                return jsonify({'error': 'Forbidden'}), 403
+            return render_template('error.html', 
+                                 error_code=403, 
+                                 error_message="Access forbidden"), 403
         
-        if request.path.startswith('/api/'):
-            return jsonify({
-                'error': 'Internal server error',
-                'error_id': error_id,
-                'message': 'An internal error occurred'
-            }), 500
+        @app.errorhandler(404)
+        def not_found(error):
+            log_security_event("404_ERROR", f"Not found: {request.url}")
+            if request.is_json:
+                return jsonify({'error': 'Not found'}), 404
+            return render_template('error.html', 
+                                 error_code=404, 
+                                 error_message="Page not found"), 404
         
-        return render_template('error.html',
-                             error_code=500,
-                             error_message="Internal server error",
-                             error_id=error_id), 500
-    
-    def handle_timeout(self, error):
-        """Handle timeout errors"""
-        log_security_event("TIMEOUT_ERROR", str(error), "WARNING")
+        @app.errorhandler(500)
+        def internal_error(error):
+            log_security_event("500_ERROR", str(error), "ERROR")
+            if request.is_json:
+                return jsonify({'error': 'Internal server error'}), 500
+            return render_template('error.html', 
+                                 error_code=500, 
+                                 error_message="Internal server error"), 500
         
-        if request.path.startswith('/api/'):
-            return jsonify({
-                'error': 'Timeout',
-                'message': 'The request timed out. Please try again.'
-            }), 408
+        @app.errorhandler(503)
+        def service_unavailable(error):
+            log_security_event("503_ERROR", f"Service unavailable: {request.url}")
+            if request.is_json:
+                return jsonify({'error': 'Service temporarily unavailable'}), 503
+            return render_template('error.html', 
+                                 error_code=503, 
+                                 error_message="Service temporarily unavailable"), 503
         
-        return render_template('error.html',
-                             error_code=408,
-                             error_message="Request timed out"), 408
-    
-    def handle_general_error(self, error):
-        """Handle general exceptions"""
-        error_id = f"error_{int(datetime.utcnow().timestamp())}"
-        log_security_event("GENERAL_ERROR", f"Error ID: {error_id}, Type: {type(error).__name__}, Details: {str(error)}", "ERROR")
-        
-        # Log full traceback
-        logging.error(f"General Error {error_id}: {traceback.format_exc()}")
-        
-        if request.path.startswith('/api/'):
-            return jsonify({
-                'error': 'Application error',
-                'error_id': error_id,
-                'message': 'An error occurred processing your request'
-            }), 500
-        
-        return render_template('error.html',
-                             error_code=500,
-                             error_message="An error occurred",
-                             error_id=error_id), 500
+        @app.errorhandler(Exception)
+        def handle_exception(error):
+            """Handle any unhandled exceptions"""
+            log_security_event("UNHANDLED_EXCEPTION", str(error), "CRITICAL")
+            logging.exception("Unhandled exception occurred")
+            
+            if request.is_json:
+                return jsonify({'error': 'An unexpected error occurred'}), 500
+            return render_template('error.html', 
+                                 error_code=500, 
+                                 error_message="An unexpected error occurred"), 500
 
-# Create global error handler
-error_handler = ErrorHandler()
+# Global error handler instance
+error_handler = ProductionErrorHandler()

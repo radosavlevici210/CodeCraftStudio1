@@ -49,7 +49,10 @@ Please provide the lyrics in this JSON format:
     "full_text": "complete song lyrics as one text"
 }}"""
 
-        client = openai.OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+        if not openai_client:
+            return _get_fallback_lyrics(theme, title)
+        
+        client = openai_client
 
         # Add timeout to prevent worker timeouts
         import signal
@@ -86,6 +89,10 @@ Please provide the lyrics in this JSON format:
 
         finally:
             signal.alarm(0)  # Ensure timeout is always cancelled
+
+    except Exception as e:
+        log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
+        return _get_fallback_lyrics(theme, title)
 
 def _get_fallback_lyrics(theme, title):
     """Return fallback lyrics when AI is not available"""

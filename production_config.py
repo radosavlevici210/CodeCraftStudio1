@@ -12,8 +12,9 @@ class ProductionConfig:
     """Production-ready configuration settings"""
     
     # API Timeouts (seconds)
-    OPENAI_TIMEOUT = 10
+    OPENAI_TIMEOUT = 15
     API_RATE_LIMIT = 60  # requests per minute
+    GENERATION_TIMEOUT = 30  # Total generation timeout
     
     # Worker Configuration
     WORKER_TIMEOUT = 30  # seconds
