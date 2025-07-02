@@ -63,8 +63,37 @@ def watermark_content(content_type, file_path):
         'creator': 'Ervin Remus Radosavlevici',
         'license': 'Radosavlevici Game License v1.0',
         'timestamp': datetime.utcnow().isoformat(),
-        'protection': 'RADOS Quantum Enforcement Policy v2.7'
+        'protection': 'RADOS Quantum Enforcement Policy v2.7',
+        'warning': 'UNAUTHORIZED USAGE IS PROHIBITED - Content protected by digital blessing/curse system'
     }
+    
+    # Enhanced protection for audio content
+    if content_type == "VOICE_AUDIO":
+        log_security_event("AUDIO_PROTECTION_APPLIED", 
+                          f"Sacred audio protection applied to {file_path} - "
+                          f"Blessed for honest users, cursed for thieves")
     
     log_security_event("CONTENT_WATERMARKED", f"{content_type}: {file_path}")
     return watermark_data
+
+def detect_unauthorized_access():
+    """Detect potential unauthorized access or content theft"""
+    try:
+        if request:
+            suspicious_patterns = [
+                'bot', 'scraper', 'crawler', 'spider', 'automated'
+            ]
+            
+            user_agent = request.headers.get('User-Agent', '').lower()
+            for pattern in suspicious_patterns:
+                if pattern in user_agent:
+                    log_security_event("SUSPICIOUS_ACCESS", 
+                                     f"Potential unauthorized bot detected: {user_agent}",
+                                     "WARNING")
+                    return True
+        
+        return False
+        
+    except Exception as e:
+        log_security_event("SECURITY_CHECK_ERROR", str(e), "ERROR")
+        return False

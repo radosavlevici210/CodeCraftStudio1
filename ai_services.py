@@ -68,7 +68,8 @@ def generate_lyrics(theme, title="Invictus Aeternum"):
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
-            max_tokens=1500
+            max_tokens=1500,
+            timeout=30  # Add timeout to prevent hanging
         )
         
         if response.choices[0].message.content:
@@ -145,7 +146,8 @@ def enhance_music_prompt(lyrics_data, music_style):
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
-            max_tokens=800
+            max_tokens=800,
+            timeout=30  # Add timeout to prevent hanging
         )
         
         if response.choices[0].message.content:
