@@ -59,10 +59,24 @@ class MusicGenerator:
             tts = gTTS(text=lyrics_text, lang='en', slow=False)
             timestamp = int(time.time())
             raw_voice_file = f"static/audio/voice_raw_{timestamp}.mp3"
-            tts.save(raw_voice_file)
             
-            # Load audio for processing
-            audio = AudioSegment.from_mp3(raw_voice_file)
+            try:
+                tts.save(raw_voice_file)
+                
+                # Wait a moment for file to be written
+                time.sleep(0.5)
+                
+                # Check if file exists and has content
+                if not os.path.exists(raw_voice_file) or os.path.getsize(raw_voice_file) == 0:
+                    raise Exception("TTS file generation failed")
+                
+                # Load audio for processing
+                audio = AudioSegment.from_mp3(raw_voice_file)
+                
+            except Exception as e:
+                logging.error(f"TTS generation failed: {e}")
+                # Create a simple synthetic audio as fallback
+                audio = self.create_fallback_voice(lyrics_text, voice_style)
             
             # Apply effects based on voice style
             effects = self.voice_styles.get(voice_style, {}).get('effects', [])
@@ -490,3 +504,37 @@ class MusicGenerator:
     def get_voice_style_description(self, style):
         """Get description of voice style"""
         return self.voice_styles.get(style, {}).get('description', 'Professional voice performance')
+    
+    def create_fallback_voice(self, lyrics_text, voice_style):
+        """Create fallback synthetic voice when TTS fails"""
+        try:
+            # Create a simple tone-based audio as fallback
+            from pydub.generators import Sine
+            
+            # Calculate duration based on text length (rough estimate)
+            duration_ms = len(lyrics_text) * 100  # 100ms per character
+            duration_ms = max(3000, min(duration_ms, 30000))  # Between 3-30 seconds
+            
+            # Create a simple musical tone
+            base_freq = 440  # A note
+            if voice_style == 'soprano':
+                base_freq = 523  # C5
+            elif voice_style == 'heroic_male':
+                base_freq = 330  # E4
+            elif voice_style == 'whisper':
+                base_freq = 220  # A3
+            
+            # Generate simple tone
+            tone = Sine(base_freq).to_audio_segment(duration=duration_ms)
+            
+            # Add some variation
+            tone = tone.fade_in(500).fade_out(500)
+            tone = tone - 10  # Reduce volume slightly
+            
+            logging.info(f"Created fallback voice: {duration_ms}ms duration")
+            return tone
+            
+        except Exception as e:
+            logging.error(f"Fallback voice creation failed: {e}")
+            # Return a minimal silence as last resort
+            return AudioSegment.silent(duration=5000)
