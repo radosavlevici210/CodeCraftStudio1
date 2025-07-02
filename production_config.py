@@ -46,19 +46,39 @@ class ProductionConfig:
     @staticmethod
     def apply_to_app(app):
         """Apply production configuration to Flask app"""
+        # Basic Flask configuration
+        app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'rados-quantum-enforcement-v2.7-production')
+        
+        # Database configuration
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/codecraft_studio.db'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_size': ProductionConfig.DB_POOL_SIZE,
+            'pool_timeout': ProductionConfig.DB_POOL_TIMEOUT,
+            'pool_recycle': ProductionConfig.DB_POOL_RECYCLE
+        }
+        
         # Apply timeout settings
         app.config['SEND_FILE_MAX_AGE_DEFAULT'] = timedelta(hours=1)
         app.config['PERMANENT_SESSION_LIFETIME'] = ProductionConfig.SESSION_TIMEOUT
         
-        # Apply security settings (only in production)
-        if not app.config.get('DEBUG', False):
-            app.config['SESSION_COOKIE_SECURE'] = True
+        # Apply security settings
         app.config['SESSION_COOKIE_HTTPONLY'] = True
         app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        if not app.debug:
+            app.config['SESSION_COOKIE_SECURE'] = True
         
         # Apply production-specific settings
         app.config['WTF_CSRF_TIME_LIMIT'] = 3600
         app.config['MAX_CONTENT_LENGTH'] = ProductionConfig.MAX_FILE_SIZE
+        
+        # Performance settings
+        app.config['JSON_SORT_KEYS'] = False
+        app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+        
+        # Template settings for production
+        app.jinja_env.auto_reload = False
+        app.jinja_env.cache_size = 400
         
         return app
 

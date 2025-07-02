@@ -17,6 +17,8 @@ import os
 import json
 import uuid
 import logging
+from health_monitor import health_monitor # Added import
+from analytics import analytics # Added import
 
 # Initialize all systems
 ai_agent = InvictusAIAgent()
@@ -29,20 +31,22 @@ def index():
     """Main page"""
     try:
         enforce_rados_protection()
-        
+
         # Get recent generations
         recent_generations = Generation.query.filter_by(status='completed').order_by(Generation.created_at.desc()).limit(5).all()
-        
+
         # Get system health
-        system_health = ai_agent.monitor_system_health()
-        
+        system_health = health_monitor.get_health_status() # Modified to use health_monitor
+        analytics_summary = analytics.get_analytics_summary() # Modified to use analytics
+
         # Get statistics
         stats = ai_agent.get_generation_statistics()
-        
+
         return render_template('index.html', 
                              recent_generations=recent_generations,
                              system_health=system_health,
-                             stats=stats)
+                             stats=stats,
+                             analytics=analytics_summary) # Added analytics to template
     except Exception as e:
         log_security_event("INDEX_ERROR", str(e), "ERROR")
         flash("An error occurred loading the page", "error")
@@ -56,57 +60,57 @@ def generate():
     """Generation page"""
     try:
         enforce_rados_protection()
-        
+
         if request.method == 'POST':
             # Get form data
             theme = request.form.get('theme', '').strip()
             title = request.form.get('title', '').strip()
             voice_style = request.form.get('voice_style', 'heroic_male')
             music_style = request.form.get('music_style', 'epic')
-            
+
             # Validate input
             if not theme:
                 flash("Theme is required", "error")
                 return render_template('generate.html')
-            
+
             if len(theme) < 3:
                 flash("Theme must be at least 3 characters long", "error")
                 return render_template('generate.html')
-            
+
             # Generate content with production timeout
             try:
                 log_security_event("GENERATION_REQUEST", f"Theme: {theme}, Title: {title}")
-                
+
                 # Add production timeout wrapper
                 import signal
-                
+
                 def timeout_handler(signum, frame):
                     raise TimeoutError("Generation timed out")
-                
+
                 signal.signal(signal.SIGALRM, timeout_handler)
                 signal.alarm(25)  # 25 second total timeout
-                
+
                 try:
                     # Use AI agent to generate complete content
                     result = ai_agent.generate_complete_content(theme, title)
                     signal.alarm(0)  # Cancel timeout
-                    
+
                     flash("Generation completed successfully!", "success")
                     return redirect(url_for('results', generation_id=result['id']))
-                    
+
                 except TimeoutError:
                     signal.alarm(0)
                     log_security_event("GENERATION_TIMEOUT", f"Theme: {theme}")
                     flash("Generation timed out. Please try a simpler theme.", "warning")
                     return render_template('generate.html')
-                    
+
                 except Exception as gen_error:
                     signal.alarm(0)
                     raise gen_error
-                
+
             except Exception as e:
                 log_security_event("GENERATION_PROCESS_ERROR", str(e), "ERROR")
-                
+
                 # Provide user-friendly error messages
                 if "timeout" in str(e).lower():
                     flash("Generation timed out. Please try again with a simpler theme.", "warning")
@@ -114,12 +118,12 @@ def generate():
                     flash("AI service temporarily unavailable. Please try again.", "warning")
                 else:
                     flash("Generation failed. Please try again.", "error")
-                    
+
                 return render_template('generate.html')
-        
+
         # GET request - show form
         return render_template('generate.html')
-        
+
     except Exception as e:
         log_security_event("GENERATE_PAGE_ERROR", str(e), "ERROR")
         flash("An error occurred", "error")
@@ -130,23 +134,23 @@ def results(generation_id):
     """Results page"""
     try:
         enforce_rados_protection()
-        
+
         # Get generation record
         generation = Generation.query.get_or_404(generation_id)
-        
+
         # Parse lyrics data
         lyrics_data = generation.get_lyrics_data()
-        
+
         # Check if files exist
         audio_exists = generation.audio_file and os.path.exists(generation.audio_file)
         video_exists = generation.video_file and os.path.exists(generation.video_file)
-        
+
         return render_template('results.html',
                              generation=generation,
                              lyrics_data=lyrics_data,
                              audio_exists=audio_exists,
                              video_exists=video_exists)
-        
+
     except Exception as e:
         log_security_event("RESULTS_PAGE_ERROR", str(e), "ERROR")
         flash("Could not load results", "error")
@@ -157,22 +161,22 @@ def download(generation_id, file_type):
     """Download generated files"""
     try:
         enforce_rados_protection()
-        
+
         generation = Generation.query.get_or_404(generation_id)
-        
+
         if file_type == 'audio' and generation.audio_file:
             if os.path.exists(generation.audio_file):
                 log_security_event("FILE_DOWNLOAD", f"Audio: {generation.audio_file}")
                 return send_file(generation.audio_file, as_attachment=True)
-        
+
         elif file_type == 'video' and generation.video_file:
             if os.path.exists(generation.video_file):
                 log_security_event("FILE_DOWNLOAD", f"Video: {generation.video_file}")
                 return send_file(generation.video_file, as_attachment=True)
-        
+
         flash("File not found", "error")
         return redirect(url_for('results', generation_id=generation_id))
-        
+
     except Exception as e:
         log_security_event("DOWNLOAD_ERROR", str(e), "ERROR")
         flash("Download failed", "error")
@@ -183,38 +187,59 @@ def gallery():
     """Gallery of all generations"""
     try:
         enforce_rados_protection()
-        
+
         page = request.args.get('page', 1, type=int)
         per_page = 12
-        
+
         generations = Generation.query.filter_by(status='completed').order_by(
             Generation.created_at.desc()
         ).paginate(
             page=page, per_page=per_page, error_out=False
         )
-        
+
         return render_template('gallery.html', generations=generations)
-        
+
     except Exception as e:
         log_security_event("GALLERY_ERROR", str(e), "ERROR")
         flash("Could not load gallery", "error")
         return redirect(url_for('index'))
 
 @app.route('/health')
-def health():
-    """System health endpoint"""
+def health_check():
+    """Production health check endpoint"""
     try:
-        from health_monitor import health_monitor
-        health_data = health_monitor.get_health_status()
-        
-        # Also get AI agent health
-        ai_health = ai_agent.monitor_system_health()
-        health_data['ai_system'] = ai_health
-        
-        return jsonify(health_data)
+        health_status = health_monitor.get_health_status()
+        return jsonify(health_status), 200
     except Exception as e:
         log_security_event("HEALTH_CHECK_ERROR", str(e), "ERROR")
-        return jsonify({"error": "Health check failed"}), 500
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/analytics')
+def analytics_dashboard():
+    """Production analytics dashboard"""
+    try:
+        analytics_data = analytics.get_analytics_summary()
+        return jsonify(analytics_data), 200
+    except Exception as e:
+        log_security_event("ANALYTICS_ERROR", str(e), "ERROR")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/status')
+def system_status():
+    """Comprehensive system status"""
+    try:
+        status = {
+            'health': health_monitor.get_health_status(),
+            'analytics': analytics.get_analytics_summary(),
+            'security': {
+                'protection_active': True,
+                'rados_version': '2.7',
+                'owner': 'Ervin Remus Radosavlevici'
+            }
+        }
+        return jsonify(status), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/stats')
 def stats():
@@ -233,15 +258,15 @@ def youtube_upload():
     """YouTube upload API endpoint"""
     try:
         enforce_rados_protection()
-        
+
         generation_id = request.json.get('generation_id')
         if not generation_id:
             return jsonify({"error": "Generation ID required"}), 400
-        
+
         generation = Generation.query.get(generation_id)
         if not generation:
             return jsonify({"error": "Generation not found"}), 404
-        
+
         # Prepare upload package
         generation_data = {
             'id': generation.id,
@@ -253,13 +278,14 @@ def youtube_upload():
             'audio_file': generation.audio_file,
             'video_file': generation.video_file
         }
-        
+
         package = youtube_uploader.prepare_upload_package(generation_data)
-        result = youtube_uploader.simulate_youtube_upload(package)
-        
+        result =```python
+ youtube_uploader.simulate_youtube_upload(package)
+
         log_security_event("YOUTUBE_UPLOAD_REQUEST", f"Generation: {generation_id}")
         return jsonify(result)
-        
+
     except Exception as e:
         log_security_event("YOUTUBE_UPLOAD_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -269,30 +295,30 @@ def create_collaboration():
     """Create collaborative session"""
     try:
         enforce_rados_protection()
-        
+
         generation_id = request.json.get('generation_id')
         user_name = request.json.get('user_name', 'Anonymous')
-        
+
         if not generation_id:
             return jsonify({"error": "Generation ID required"}), 400
-        
+
         # Create user session if not exists
         if 'user_id' not in session:
             session['user_id'] = str(uuid.uuid4())
-        
+
         user_id = session['user_id']
-        
+
         session_id = collaboration_system.create_collaborative_session(
             generation_id, user_id, user_name
         )
-        
+
         log_security_event("COLLABORATION_CREATED", f"Session: {session_id}")
         return jsonify({
             "session_id": session_id,
             "user_id": user_id,
             "status": "created"
         })
-        
+
     except Exception as e:
         log_security_event("COLLABORATION_CREATE_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -302,27 +328,27 @@ def join_collaboration():
     """Join collaborative session"""
     try:
         enforce_rados_protection()
-        
+
         session_id = request.json.get('session_id')
         user_name = request.json.get('user_name', 'Anonymous')
-        
+
         if not session_id:
             return jsonify({"error": "Session ID required"}), 400
-        
+
         if 'user_id' not in session:
             session['user_id'] = str(uuid.uuid4())
-        
+
         user_id = session['user_id']
-        
+
         collaboration_system.join_collaborative_session(session_id, user_id, user_name)
-        
+
         log_security_event("COLLABORATION_JOINED", f"Session: {session_id}")
         return jsonify({
             "session_id": session_id,
             "user_id": user_id,
             "status": "joined"
         })
-        
+
     except Exception as e:
         log_security_event("COLLABORATION_JOIN_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -332,17 +358,17 @@ def get_collaboration_updates(session_id):
     """Get live collaboration updates"""
     try:
         enforce_rados_protection()
-        
+
         if 'user_id' not in session:
             return jsonify({"error": "User not authenticated"}), 401
-        
+
         user_id = session['user_id']
         last_update_id = request.args.get('last_update_id')
-        
+
         updates = collaboration_system.get_live_updates(session_id, user_id, last_update_id)
-        
+
         return jsonify({"updates": updates})
-        
+
     except Exception as e:
         log_security_event("COLLABORATION_UPDATES_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -352,18 +378,18 @@ def create_audio_mix():
     """Create professional audio mix"""
     try:
         enforce_rados_protection()
-        
+
         audio_tracks = request.json.get('tracks', [])
         mixing_style = request.json.get('style', 'cinematic_epic')
-        
+
         if not audio_tracks:
             return jsonify({"error": "Audio tracks required"}), 400
-        
+
         mix_result = audio_mixer.create_professional_mix(audio_tracks, mixing_style)
-        
+
         log_security_event("AUDIO_MIX_CREATED", f"Style: {mixing_style}")
         return jsonify(mix_result)
-        
+
     except Exception as e:
         log_security_event("AUDIO_MIX_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -373,21 +399,21 @@ def train_custom_voice():
     """Train custom voice model"""
     try:
         enforce_rados_protection()
-        
+
         voice_name = request.json.get('voice_name')
         training_samples = request.json.get('training_samples', [])
         target_characteristics = request.json.get('target_characteristics', {})
-        
+
         if not voice_name or not training_samples:
             return jsonify({"error": "Voice name and training samples required"}), 400
-        
+
         model_package = voice_trainer.create_custom_voice_model(
             voice_name, training_samples, target_characteristics
         )
-        
+
         log_security_event("VOICE_TRAINING_COMPLETED", f"Voice: {voice_name}")
         return jsonify(model_package)
-        
+
     except Exception as e:
         log_security_event("VOICE_TRAINING_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -397,23 +423,23 @@ def synthesize_custom_voice():
     """Synthesize speech with custom voice"""
     try:
         enforce_rados_protection()
-        
+
         text = request.json.get('text')
         voice_model_id = request.json.get('voice_model_id')
         emotion = request.json.get('emotion', 'neutral')
-        
+
         if not text or not voice_model_id:
             return jsonify({"error": "Text and voice model ID required"}), 400
-        
+
         audio_file = voice_trainer.synthesize_with_custom_voice(text, voice_model_id, emotion)
-        
+
         log_security_event("CUSTOM_VOICE_SYNTHESIS", f"Model: {voice_model_id}")
         return jsonify({
             "audio_file": audio_file,
             "voice_model_id": voice_model_id,
             "emotion": emotion
         })
-        
+
     except Exception as e:
         log_security_event("CUSTOM_VOICE_SYNTHESIS_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -423,22 +449,22 @@ def evaluate_voice_quality():
     """Evaluate custom voice quality"""
     try:
         enforce_rados_protection()
-        
+
         voice_model_id = request.json.get('voice_model_id')
         test_texts = request.json.get('test_texts', [
             "This is a test of the voice quality evaluation system.",
             "The quick brown fox jumps over the lazy dog.",
             "Artificial intelligence is transforming the world of audio synthesis."
         ])
-        
+
         if not voice_model_id:
             return jsonify({"error": "Voice model ID required"}), 400
-        
+
         evaluation_results = voice_trainer.evaluate_voice_quality(voice_model_id, test_texts)
-        
+
         log_security_event("VOICE_QUALITY_EVALUATION", f"Model: {voice_model_id}")
         return jsonify(evaluation_results)
-        
+
     except Exception as e:
         log_security_event("VOICE_EVALUATION_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -448,11 +474,11 @@ def get_youtube_analytics(video_id):
     """Get YouTube video analytics"""
     try:
         enforce_rados_protection()
-        
+
         analytics = youtube_uploader.get_upload_analytics(video_id)
-        
+
         return jsonify(analytics)
-        
+
     except Exception as e:
         log_security_event("YOUTUBE_ANALYTICS_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -462,11 +488,11 @@ def get_collaboration_analytics(session_id):
     """Get collaboration session analytics"""
     try:
         enforce_rados_protection()
-        
+
         analytics = collaboration_system.get_session_analytics(session_id)
-        
+
         return jsonify(analytics)
-        
+
     except Exception as e:
         log_security_event("COLLABORATION_ANALYTICS_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
@@ -478,11 +504,11 @@ def collaboration_page():
     """Collaboration dashboard page"""
     try:
         enforce_rados_protection()
-        
+
         # Get user's active sessions
         user_id = session.get('user_id')
         active_sessions = []
-        
+
         if user_id:
             # Get active collaboration sessions for user
             for session_id, session_data in collaboration_system.active_sessions.items():
@@ -493,9 +519,9 @@ def collaboration_page():
                         'participants': len(session_data['participants']),
                         'created_at': session_data['created_at']
                     })
-        
+
         return render_template('collaboration.html', active_sessions=active_sessions)
-        
+
     except Exception as e:
         log_security_event("COLLABORATION_PAGE_ERROR", str(e), "ERROR")
         flash("Could not load collaboration page", "error")
@@ -506,11 +532,11 @@ def voice_training_page():
     """Voice training dashboard page"""
     try:
         enforce_rados_protection()
-        
+
         # Get available voice models
         voice_models = []
         models_dir = 'static/voice_models'
-        
+
         if os.path.exists(models_dir):
             for filename in os.listdir(models_dir):
                 if filename.endswith('.json'):
@@ -525,9 +551,9 @@ def voice_training_page():
                             })
                     except:
                         continue
-        
+
         return render_template('voice_training.html', voice_models=voice_models)
-        
+
     except Exception as e:
         log_security_event("VOICE_TRAINING_PAGE_ERROR", str(e), "ERROR")
         flash("Could not load voice training page", "error")
@@ -538,11 +564,11 @@ def audio_mixer_page():
     """Audio mixer dashboard page"""
     try:
         enforce_rados_protection()
-        
+
         # Get recent mixes
         recent_mixes = []
         mixing_dir = 'static/mixing'
-        
+
         if os.path.exists(mixing_dir):
             for filename in os.listdir(mixing_dir):
                 if filename.startswith('session_') and filename.endswith('.json'):
@@ -557,11 +583,11 @@ def audio_mixer_page():
                             })
                     except:
                         continue
-        
+
         return render_template('audio_mixer.html', 
                              recent_mixes=recent_mixes,
                              mixing_presets=list(audio_mixer.mixing_presets.keys()))
-        
+
     except Exception as e:
         log_security_event("AUDIO_MIXER_PAGE_ERROR", str(e), "ERROR")
         flash("Could not load audio mixer page", "error")
