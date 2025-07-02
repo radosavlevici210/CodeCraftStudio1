@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Gallery - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark border-gold">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="text-gold mb-0">
+                                <i class="fas fa-images"></i> Generation Gallery
+                            </h2>
+                            <p class="text-muted mb-0">Explore all epic compositions created with CodeCraft Studio</p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ url_for('generate') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> New Generation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if generations.items %}
+                        <div class="row">
+                            {% for generation in generations.items %}
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="generation-card">
+                                        <div class="generation-header">
+                                            <h5 class="text-gold">{{ generation.title }}</h5>
+                                            <small class="text-muted">
+                                                {{ generation.created_at.strftime('%b %d, %Y') }}
+                                            </small>
+                                        </div>
+                                        <div class="generation-body">
+                                            <div class="generation-theme">
+                                                <i class="fas fa-lightbulb text-warning"></i>
+                                                <strong>Theme:</strong> {{ generation.theme }}
+                                            </div>
+                                            <div class="generation-style">
+                                                <i class="fas fa-music text-info"></i>
+                                                <strong>Style:</strong> {{ generation.music_style|title }}
+                                            </div>
+                                            <div class="generation-voice">
+                                                <i class="fas fa-microphone text-success"></i>
+                                                <strong>Voice:</strong> {{ generation.voice_style|title }}
+                                            </div>
+                                            <div class="generation-status">
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> {{ generation.status|title }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="generation-footer">
+                                            <a href="{{ url_for('results', generation_id=generation.id) }}" 
+                                               class="btn btn-outline-gold btn-sm">
+                                                <i class="fas fa-eye"></i> View Results
+                                            </a>
+                                            {% if generation.audio_file %}
+                                                <a href="{{ url_for('download', generation_id=generation.id, file_type='audio') }}" 
+                                                   class="btn btn-outline-info btn-sm">
+                                                    <i class="fas fa-download"></i> Audio
+                                                </a>
+                                            {% endif %}
+                                            {% if generation.video_file %}
+                                                <a href="{{ url_for('download', generation_id=generation.id, file_type='video') }}" 
+                                                   class="btn btn-outline-warning btn-sm">
+                                                    <i class="fas fa-video"></i> Video
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if generations.pages > 1 %}
+                            <nav aria-label="Gallery pagination">
+                                <ul class="pagination justify-content-center">
+                                    {% if generations.has_prev %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('gallery', page=generations.prev_num) }}">
+                                                <i class="fas fa-chevron-left"></i> Previous
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for page_num in generations.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                        {% if page_num %}
+                                            {% if page_num != generations.page %}
+                                                <li class="page-item">
+                                                    <a class="page-link" href="{{ url_for('gallery', page=page_num) }}">{{ page_num }}</a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item active">
+                                                    <span class="page-link">{{ page_num }}</span>
+                                                </li>
+                                            {% endif %}
+                                        {% else %}
+                                            <li class="page-item disabled">
+                                                <span class="page-link">...</span>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if generations.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="{{ url_for('gallery', page=generations.next_num) }}">
+                                                Next <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-music fa-5x text-muted mb-4"></i>
+                            <h3 class="text-muted">No Generations Yet</h3>
+                            <p class="text-muted mb-4">Be the first to create an epic composition!</p>
+                            <a href="{{ url_for('generate') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-magic"></i> Start Creating
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

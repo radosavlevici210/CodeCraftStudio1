@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-dark border-gold">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="text-gold mb-0">
+                                <i class="fas fa-crown"></i> {{ generation.title }}
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Generated on {{ generation.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> {{ generation.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Generation Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <div class="stat-value text-gold">{{ generation.theme }}</div>
+                                <div class="stat-label">Theme</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <div class="stat-value text-info">{{ generation.music_style|title }}</div>
+                                <div class="stat-label">Music Style</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <div class="stat-value text-warning">{{ generation.voice_style|title }}</div>
+                                <div class="stat-label">Voice Style</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <div class="stat-value text-success">{{ generation.id }}</div>
+                                <div class="stat-label">Generation ID</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Download Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="download-card">
+                                <div class="download-icon">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <div class="download-content">
+                                    <h5>Audio Track</h5>
+                                    <p class="text-muted">Professional voice with cinematic music</p>
+                                    {% if audio_exists %}
+                                        <a href="{{ url_for('download', generation_id=generation.id, file_type='audio') }}" 
+                                           class="btn btn-outline-gold">
+                                            <i class="fas fa-download"></i> Download Audio
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">
+                                            <i class="fas fa-exclamation-triangle"></i> File not available
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="download-card">
+                                <div class="download-icon">
+                                    <i class="fas fa-video"></i>
+                                </div>
+                                <div class="download-content">
+                                    <h5>Cinematic Video</h5>
+                                    <p class="text-muted">Synchronized visuals with audio</p>
+                                    {% if video_exists %}
+                                        <a href="{{ url_for('download', generation_id=generation.id, file_type='video') }}" 
+                                           class="btn btn-outline-gold">
+                                            <i class="fas fa-download"></i> Download Video
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">
+                                            <i class="fas fa-exclamation-triangle"></i> File not available
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lyrics Display -->
+                    {% if lyrics_data %}
+                        <div class="card bg-secondary border-gold mb-4">
+                            <div class="card-header">
+                                <h4 class="text-gold mb-0">
+                                    <i class="fas fa-scroll"></i> Generated Lyrics
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="lyrics-display">
+                                    {% if lyrics_data.verses %}
+                                        {% for verse in lyrics_data.verses %}
+                                            <div class="verse-section mb-3">
+                                                <div class="verse-header">
+                                                    <span class="badge bg-gold text-dark">{{ verse.type|title }}</span>
+                                                    {% if verse.timing %}
+                                                        <span class="badge bg-info">{{ verse.timing }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="verse-content">
+                                                    {{ verse.lyrics|replace('\n', '<br>')|safe }}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="full-lyrics">
+                                            {{ lyrics_data.full_text|replace('\n', '<br>')|safe }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- AI Analysis -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-secondary border-gold">
+                                <div class="card-header">
+                                    <h5 class="text-gold mb-0">
+                                        <i class="fas fa-brain"></i> AI Analysis
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="analysis-item">
+                                        <strong>Mood:</strong> {{ lyrics_data.mood|default('Heroic')|title }}
+                                    </div>
+                                    {% if lyrics_data.latin_phrases %}
+                                        <div class="analysis-item">
+                                            <strong>Latin Phrases:</strong>
+                                            <ul class="mb-0">
+                                                {% for phrase in lyrics_data.latin_phrases %}
+                                                    <li>{{ phrase }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                    {% if lyrics_data.structure %}
+                                        <div class="analysis-item">
+                                            <strong>Structure:</strong> {{ lyrics_data.structure|join(' → ')|title }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-secondary border-gold">
+                                <div class="card-header">
+                                    <h5 class="text-gold mb-0">
+                                        <i class="fas fa-shield-alt"></i> Protection Info
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="protection-item">
+                                        <i class="fas fa-copyright text-gold"></i>
+                                        <strong>Creator:</strong> Ervin Remus Radosavlevici
+                                    </div>
+                                    <div class="protection-item">
+                                        <i class="fas fa-balance-scale text-gold"></i>
+                                        <strong>License:</strong> Radosavlevici Game License v1.0
+                                    </div>
+                                    <div class="protection-item">
+                                        <i class="fas fa-lock text-gold"></i>
+                                        <strong>Protection:</strong> RADOS Quantum Enforcement Policy v2.7
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('generate') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-plus"></i> Generate Another
+                        </a>
+                        <a href="{{ url_for('gallery') }}" class="btn btn-outline-gold me-2">
+                            <i class="fas fa-images"></i> View Gallery
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-light">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

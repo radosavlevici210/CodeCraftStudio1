@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Generate - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark border-gold">
+                <div class="card-header">
+                    <h2 class="card-title text-gold mb-0">
+                        <i class="fas fa-magic"></i> Create Your Epic Composition
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="generateForm">
+                        <div class="mb-4">
+                            <label for="theme" class="form-label text-gold">
+                                <i class="fas fa-lightbulb"></i> Theme *
+                            </label>
+                            <input type="text" 
+                                   class="form-control form-control-lg" 
+                                   id="theme" 
+                                   name="theme" 
+                                   placeholder="Enter your theme (e.g., 'Epic Battle', 'Divine Journey', 'Heroic Victory')"
+                                   required>
+                            <div class="form-text">
+                                The theme will guide the AI in generating lyrics, music style, and cinematic scenes.
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="title" class="form-label text-gold">
+                                <i class="fas fa-heading"></i> Title (Optional)
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   name="title" 
+                                   placeholder="Custom title for your composition">
+                            <div class="form-text">
+                                Leave blank to auto-generate a title based on your theme.
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label for="voice_style" class="form-label text-gold">
+                                    <i class="fas fa-microphone"></i> Voice Style
+                                </label>
+                                <select class="form-select" id="voice_style" name="voice_style">
+                                    <option value="heroic_male">Heroic Male - Deep, powerful voice</option>
+                                    <option value="soprano">Soprano - High, ethereal female voice</option>
+                                    <option value="choir">Choir - Full harmony chorus</option>
+                                    <option value="whisper">Whisper - Intimate, mysterious voice</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <label for="music_style" class="form-label text-gold">
+                                    <i class="fas fa-music"></i> Music Style
+                                </label>
+                                <select class="form-select" id="music_style" name="music_style">
+                                    <option value="epic">Epic - Orchestral with full symphony</option>
+                                    <option value="gladiator">Gladiator - Battle drums and brass</option>
+                                    <option value="fantasy">Fantasy - Magical orchestral elements</option>
+                                    <option value="gregorian">Gregorian - Sacred chant atmosphere</option>
+                                    <option value="dark">Dark - Brooding minor keys</option>
+                                    <option value="emotional">Emotional - Ballad with strings</option>
+                                    <option value="pop">Pop - Modern with orchestral elements</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>AI Enhancement:</strong> 
+                                Our self-learning AI will analyze your inputs and automatically optimize 
+                                voice and music styles based on your theme for the best results.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
+                                <i class="fas fa-magic"></i> Generate Epic Content
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- AI Process Visualization -->
+            <div class="card bg-dark border-gold mt-4">
+                <div class="card-header">
+                    <h4 class="text-gold mb-0">
+                        <i class="fas fa-cogs"></i> AI Generation Process
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="process-steps">
+                        <div class="process-step">
+                            <div class="step-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="step-content">
+                                <h5>1. AI Lyrics Generation</h5>
+                                <p>Advanced AI analyzes your theme and generates epic, cinematic lyrics using OpenAI GPT-4o.</p>
+                            </div>
+                        </div>
+
+                        <div class="process-step">
+                            <div class="step-icon">
+                                <i class="fas fa-microphone-alt"></i>
+                            </div>
+                            <div class="step-content">
+                                <h5>2. Voice Synthesis & Effects</h5>
+                                <p>Professional voice generation with advanced audio effects including reverb, chorus, and pitch modulation.</p>
+                            </div>
+                        </div>
+
+                        <div class="process-step">
+                            <div class="step-icon">
+                                <i class="fas fa-music"></i>
+                            </div>
+                            <div class="step-content">
+                                <h5>3. Cinematic Music Production</h5>
+                                <p>AI-driven music composition with orchestral arrangements tailored to your selected style.</p>
+                            </div>
+                        </div>
+
+                        <div class="process-step">
+                            <div class="step-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <div class="step-content">
+                                <h5>4. Synchronized Video Creation</h5>
+                                <p>Cinematic scenes generated and synchronized with lyrics, featuring epic visuals and dramatic lighting.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark border-gold">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-gold mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h4 class="text-gold">Generating Your Epic Content...</h4>
+                <p class="text-muted mb-0">AI is working its magic. This may take a few minutes.</p>
+                <div class="progress mt-3" style="height: 8px;">
+                    <div class="progress-bar bg-gold progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('generateForm').addEventListener('submit', function(e) {
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+    
+    // Disable submit button
+    const generateBtn = document.getElementById('generateBtn');
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+});
+</script>
+{% endblock %}
