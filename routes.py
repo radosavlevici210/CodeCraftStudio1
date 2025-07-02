@@ -10,6 +10,7 @@ Handles all web requests and API endpoints
 from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session, Blueprint
 from app import db
 from models import Generation, SecurityLog
+from business_licensing import BusinessLicense, SalesRecord, license_manager
 from ai_agent import InvictusAIAgent
 from youtube_uploader import YouTubeUploader
 from collaboration_system import collaboration_system
@@ -395,6 +396,202 @@ def internal_error(error):
     return render_template('error.html', 
                          error_code=500, 
                          error_message="Internal server error"), 500
+
+# ============================================================================
+# BUSINESS LICENSING ROUTES
+# ============================================================================
+
+@main_bp.route('/business')
+def business():
+    """Business licensing and sales page"""
+    try:
+        enforce_rados_protection()
+        log_security_event("BUSINESS_PAGE_ACCESS", "Business licensing page accessed")
+        return render_template('business.html')
+    except Exception as e:
+        log_security_event("BUSINESS_PAGE_ERROR", str(e), "ERROR")
+        return render_template('error.html', message="Business page unavailable"), 500
+
+@main_bp.route('/api/business/purchase', methods=['POST'])
+def purchase_license():
+    """Purchase a business license"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['license_type', 'customer_name', 'customer_email']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'error': f'Missing required field: {field}'}), 400
+        
+        # Create license
+        license_record = license_manager.create_license(
+            license_type=data['license_type'],
+            customer_name=data['customer_name'],
+            customer_email=data['customer_email'],
+            company_name=data.get('company_name')
+        )
+        
+        # Record sale
+        sale_record = license_manager.record_sale(license_record)
+        
+        log_security_event("LICENSE_PURCHASED", f"License purchased: {license_record.license_key} by {data['customer_email']}")
+        
+        return jsonify({
+            'success': True,
+            'license_key': license_record.license_key,
+            'transaction_id': sale_record.transaction_id,
+            'message': 'License purchased successfully'
+        })
+        
+    except Exception as e:
+        log_security_event("LICENSE_PURCHASE_ERROR", str(e), "ERROR")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@main_bp.route('/api/business/validate', methods=['POST'])
+def validate_license():
+    """Validate a license key"""
+    try:
+        data = request.get_json()
+        license_key = data.get('license_key')
+        
+        if not license_key:
+            return jsonify({'valid': False, 'error': 'License key required'}), 400
+        
+        valid, result = license_manager.validate_license(license_key)
+        
+        if valid:
+            return jsonify({
+                'valid': True,
+                'license_info': result.to_dict(),
+                'message': 'License is valid'
+            })
+        else:
+            return jsonify({
+                'valid': False,
+                'error': result
+            })
+        
+    except Exception as e:
+        log_security_event("LICENSE_VALIDATION_ERROR", str(e), "ERROR")
+        return jsonify({'valid': False, 'error': str(e)}), 500
+
+@main_bp.route('/api/business/analytics')
+def business_analytics():
+    """Get business sales analytics"""
+    try:
+        enforce_rados_protection()
+        analytics_data = license_manager.get_sales_analytics()
+        
+        log_security_event("BUSINESS_ANALYTICS_ACCESS", "Sales analytics accessed")
+        return jsonify(analytics_data)
+        
+    except Exception as e:
+        log_security_event("BUSINESS_ANALYTICS_ERROR", str(e), "ERROR")
+        return jsonify({'error': 'Analytics unavailable'}), 500
+
+@main_bp.route('/api/business/licenses')
+def list_licenses():
+    """List all business licenses (admin only)"""
+    try:
+        enforce_rados_protection()
+        
+        # Get all licenses with pagination
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        
+        licenses_query = BusinessLicense.query.order_by(BusinessLicense.created_at.desc())
+        licenses_paginated = licenses_query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        licenses_data = [license.to_dict() for license in licenses_paginated.items]
+        
+        return jsonify({
+            'licenses': licenses_data,
+            'total': licenses_paginated.total,
+            'pages': licenses_paginated.pages,
+            'current_page': page
+        })
+        
+    except Exception as e:
+        log_security_event("LICENSES_LIST_ERROR", str(e), "ERROR")
+        return jsonify({'error': 'Unable to retrieve licenses'}), 500
+
+@main_bp.route('/api/business/generate-protected', methods=['POST'])
+def generate_with_license():
+    """Generate content with license protection"""
+    try:
+        data = request.get_json()
+        license_key = data.get('license_key')
+        
+        if not license_key:
+            return jsonify({'success': False, 'error': 'License key required for protected generation'}), 400
+        
+        # Validate license
+        valid, license_result = license_manager.validate_license(license_key)
+        if not valid:
+            return jsonify({'success': False, 'error': f'Invalid license: {license_result}'}), 403
+        
+        # Generate content with license validation
+        generation_data = {
+            'theme': data.get('theme', 'Epic Victory'),
+            'title': data.get('title', 'Licensed Creation'),
+            'music_style': data.get('music_style', 'epic'),
+            'voice_style': data.get('voice_style', 'heroic_male')
+        }
+        
+        # Create generation record
+        generation = Generation(
+            theme=generation_data['theme'],
+            title=generation_data['title'],
+            music_style=generation_data['music_style'],
+            voice_style=generation_data['voice_style'],
+            status='processing'
+        )
+        db.session.add(generation)
+        db.session.commit()
+        
+        # Generate content using AI agent
+        try:
+            result = ai_agent.generate_complete_content(
+                theme=generation_data['theme'],
+                title=generation_data['title']
+            )
+            
+            # Apply license protection to content
+            protected_content = license_manager.apply_content_protection(
+                result.get('lyrics_data', {}).get('full_text', ''),
+                license_result
+            )
+            
+            # Update generation record
+            generation.status = 'completed'
+            generation.lyrics_data = json.dumps(result.get('lyrics_data', {}))
+            generation.audio_file = result.get('audio_file')
+            generation.video_file = result.get('video_file')
+            generation.completed_at = datetime.utcnow()
+            db.session.commit()
+            
+            log_security_event("LICENSED_GENERATION_SUCCESS", f"Content generated with license {license_key}")
+            
+            return jsonify({
+                'success': True,
+                'generation_id': generation.id,
+                'protected_content': protected_content,
+                'license_info': license_result.to_dict(),
+                'usage_remaining': max(0, license_result.max_usage - license_result.usage_count) if license_result.max_usage != -1 else 'unlimited'
+            })
+            
+        except Exception as generation_error:
+            generation.status = 'failed'
+            generation.error_message = str(generation_error)
+            db.session.commit()
+            raise generation_error
+        
+    except Exception as e:
+        log_security_event("LICENSED_GENERATION_ERROR", str(e), "ERROR")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # Context processor for global template variables
 @main_bp.context_processor
