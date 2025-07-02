@@ -1,0 +1,377 @@
+1.
+[2025-07-02 12:12:44 +0000] [22357] [INFO] Booting worker with pid: 22357
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:44 +0000] [22357] [INFO] Worker exiting (pid: 22357)
+[2025-07-02 12:12:44 +0000] [18823] [ERROR] Worker (pid:22357) exited with code 1
+[2025-07-02 12:12:44 +0000] [18823] [ERROR] Worker (pid:22357) exited with code 1.
+[2025-07-02 12:12:44 +0000] [22363] [INFO] Booting worker with pid: 22363
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:45 +0000] [22363] [INFO] Worker exiting (pid: 22363)
+[2025-07-02 12:12:45 +0000] [18823] [ERROR] Worker (pid:22363) exited with code 1
+[2025-07-02 12:12:45 +0000] [18823] [ERROR] Worker (pid:22363) exited with code 1.
+[2025-07-02 12:12:45 +0000] [22369] [INFO] Booting worker with pid: 22369
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:45 +0000] [22369] [INFO] Worker exiting (pid: 22369)
+[2025-07-02 12:12:45 +0000] [18823] [ERROR] Worker (pid:22369) exited with code 1
+[2025-07-02 12:12:45 +0000] [18823] [ERROR] Worker (pid:22369) exited with code 1.
+[2025-07-02 12:12:45 +0000] [22375] [INFO] Booting worker with pid: 22375
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:46 +0000] [22375] [INFO] Worker exiting (pid: 22375)
+[2025-07-02 12:12:46 +0000] [18823] [ERROR] Worker (pid:22375) exited with code 1
+[2025-07-02 12:12:46 +0000] [18823] [ERROR] Worker (pid:22375) exited with code 1.
+[2025-07-02 12:12:46 +0000] [22381] [INFO] Booting worker with pid: 22381
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:46 +0000] [22381] [INFO] Worker exiting (pid: 22381)
+[2025-07-02 12:12:46 +0000] [18823] [ERROR] Worker (pid:22381) exited with code 1
+[2025-07-02 12:12:46 +0000] [18823] [ERROR] Worker (pid:22381) exited with code 1.
+[2025-07-02 12:12:46 +0000] [22387] [INFO] Booting worker with pid: 22387
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:47 +0000] [22387] [INFO] Worker exiting (pid: 22387)
+[2025-07-02 12:12:47 +0000] [18823] [ERROR] Worker (pid:22387) exited with code 1
+[2025-07-02 12:12:47 +0000] [18823] [ERROR] Worker (pid:22387) exited with code 1.
+[2025-07-02 12:12:47 +0000] [22393] [INFO] Booting worker with pid: 22393
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:47 +0000] [22393] [INFO] Worker exiting (pid: 22393)
+[2025-07-02 12:12:47 +0000] [18823] [ERROR] Worker (pid:22393) exited with code 1
+[2025-07-02 12:12:47 +0000] [18823] [ERROR] Worker (pid:22393) exited with code 1.
+[2025-07-02 12:12:47 +0000] [22399] [INFO] Booting worker with pid: 22399
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:48 +0000] [22399] [INFO] Worker exiting (pid: 22399)
+[2025-07-02 12:12:48 +0000] [18823] [ERROR] Worker (pid:22399) exited with code 1
+[2025-07-02 12:12:48 +0000] [18823] [ERROR] Worker (pid:22399) exited with code 1.
+[2025-07-02 12:12:48 +0000] [22405] [INFO] Booting worker with pid: 22405
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:48 +0000] [22405] [INFO] Worker exiting (pid: 22405)
+[2025-07-02 12:12:48 +0000] [18823] [ERROR] Worker (pid:22405) exited with code 1
+[2025-07-02 12:12:48 +0000] [18823] [ERROR] Worker (pid:22405) exited with code 1.
+[2025-07-02 12:12:48 +0000] [22411] [INFO] Booting worker with pid: 22411
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:49 +0000] [22411] [INFO] Worker exiting (pid: 22411)
+[2025-07-02 12:12:49 +0000] [18823] [ERROR] Worker (pid:22411) exited with code 1
+[2025-07-02 12:12:49 +0000] [18823] [ERROR] Worker (pid:22411) exited with code 1.
+[2025-07-02 12:12:49 +0000] [22417] [INFO] Booting worker with pid: 22417
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:49 +0000] [22417] [INFO] Worker exiting (pid: 22417)
+[2025-07-02 12:12:49 +0000] [18823] [ERROR] Worker (pid:22417) exited with code 1
+[2025-07-02 12:12:49 +0000] [18823] [ERROR] Worker (pid:22417) exited with code 1.
+[2025-07-02 12:12:49 +0000] [22423] [INFO] Booting worker with pid: 22423
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:50 +0000] [22423] [INFO] Worker exiting (pid: 22423)
+[2025-07-02 12:12:50 +0000] [18823] [ERROR] Worker (pid:22423) exited with code 1
+[2025-07-02 12:12:50 +0000] [18823] [ERROR] Worker (pid:22423) exited with code 1.
+[2025-07-02 12:12:50 +0000] [22429] [INFO] Booting worker with pid: 22429
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:50 +0000] [22429] [INFO] Worker exiting (pid: 22429)
+[2025-07-02 12:12:50 +0000] [18823] [ERROR] Worker (pid:22429) exited with code 1
+[2025-07-02 12:12:50 +0000] [18823] [ERROR] Worker (pid:22429) exited with code 1.
+[2025-07-02 12:12:50 +0000] [22435] [INFO] Booting worker with pid: 22435
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:51 +0000] [22435] [INFO] Worker exiting (pid: 22435)
+[2025-07-02 12:12:51 +0000] [18823] [ERROR] Worker (pid:22435) exited with code 1
+[2025-07-02 12:12:51 +0000] [18823] [ERROR] Worker (pid:22435) exited with code 1.
+[2025-07-02 12:12:51 +0000] [22441] [INFO] Booting worker with pid: 22441
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:51 +0000] [22441] [INFO] Worker exiting (pid: 22441)
+[2025-07-02 12:12:52 +0000] [18823] [ERROR] Worker (pid:22441) exited with code 1
+[2025-07-02 12:12:52 +0000] [18823] [ERROR] Worker (pid:22441) exited with code 1.
+[2025-07-02 12:12:52 +0000] [22447] [INFO] Booting worker with pid: 22447
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:52 +0000] [22447] [INFO] Worker exiting (pid: 22447)
+[2025-07-02 12:12:52 +0000] [18823] [ERROR] Worker (pid:22447) exited with code 1
+[2025-07-02 12:12:52 +0000] [18823] [ERROR] Worker (pid:22447) exited with code 1.
+[2025-07-02 12:12:52 +0000] [22453] [INFO] Booting worker with pid: 22453
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:52 +0000] [22453] [INFO] Worker exiting (pid: 22453)
+[2025-07-02 12:12:53 +0000] [18823] [ERROR] Worker (pid:22453) exited with code 1
+[2025-07-02 12:12:53 +0000] [18823] [ERROR] Worker (pid:22453) exited with code 1.
+[2025-07-02 12:12:53 +0000] [22459] [INFO] Booting worker with pid: 22459
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:53 +0000] [22459] [INFO] Worker exiting (pid: 22459)
+[2025-07-02 12:12:53 +0000] [18823] [ERROR] Worker (pid:22459) exited with code 1
+[2025-07-02 12:12:53 +0000] [18823] [ERROR] Worker (pid:22459) exited with code 1.
+[2025-07-02 12:12:53 +0000] [22465] [INFO] Booting worker with pid: 22465
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:53 +0000] [22465] [INFO] Worker exiting (pid: 22465)
+[2025-07-02 12:12:54 +0000] [18823] [ERROR] Worker (pid:22465) exited with code 1
+[2025-07-02 12:12:54 +0000] [18823] [ERROR] Worker (pid:22465) exited with code 1.
+[2025-07-02 12:12:54 +0000] [22471] [INFO] Booting worker with pid: 22471
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:54 +0000] [22471] [INFO] Worker exiting (pid: 22471)
+[2025-07-02 12:12:54 +0000] [18823] [ERROR] Worker (pid:22471) exited with code 1
+[2025-07-02 12:12:54 +0000] [18823] [ERROR] Worker (pid:22471) exited with code 1.
+[2025-07-02 12:12:54 +0000] [22477] [INFO] Booting worker with pid: 22477
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:54 +0000] [22477] [INFO] Worker exiting (pid: 22477)
+[2025-07-02 12:12:55 +0000] [18823] [ERROR] Worker (pid:22477) exited with code 1
+[2025-07-02 12:12:55 +0000] [18823] [ERROR] Worker (pid:22477) exited with code 1.
+[2025-07-02 12:12:55 +0000] [22483] [INFO] Booting worker with pid: 22483
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:55 +0000] [22483] [INFO] Worker exiting (pid: 22483)
+[2025-07-02 12:12:55 +0000] [18823] [ERROR] Worker (pid:22483) exited with code 1
+[2025-07-02 12:12:55 +0000] [18823] [ERROR] Worker (pid:22483) exited with code 1.
+[2025-07-02 12:12:55 +0000] [22489] [INFO] Booting worker with pid: 22489
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:55 +0000] [22489] [INFO] Worker exiting (pid: 22489)
+[2025-07-02 12:12:56 +0000] [18823] [ERROR] Worker (pid:22489) exited with code 1
+[2025-07-02 12:12:56 +0000] [18823] [ERROR] Worker (pid:22489) exited with code 1.
+[2025-07-02 12:12:56 +0000] [22495] [INFO] Booting worker with pid: 22495
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:56 +0000] [22495] [INFO] Worker exiting (pid: 22495)
+[2025-07-02 12:12:56 +0000] [18823] [ERROR] Worker (pid:22495) exited with code 1
+[2025-07-02 12:12:56 +0000] [18823] [ERROR] Worker (pid:22495) exited with code 1.
+[2025-07-02 12:12:56 +0000] [22501] [INFO] Booting worker with pid: 22501
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:56 +0000] [22501] [INFO] Worker exiting (pid: 22501)
+[2025-07-02 12:12:57 +0000] [18823] [ERROR] Worker (pid:22501) exited with code 1
+[2025-07-02 12:12:57 +0000] [18823] [ERROR] Worker (pid:22501) exited with code 1.
+[2025-07-02 12:12:57 +0000] [22507] [INFO] Booting worker with pid: 22507
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:57 +0000] [22507] [INFO] Worker exiting (pid: 22507)
+[2025-07-02 12:12:57 +0000] [18823] [ERROR] Worker (pid:22507) exited with code 1
+[2025-07-02 12:12:57 +0000] [18823] [ERROR] Worker (pid:22507) exited with code 1.
+[2025-07-02 12:12:57 +0000] [22513] [INFO] Booting worker with pid: 22513
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:57 +0000] [22513] [INFO] Worker exiting (pid: 22513)
+[2025-07-02 12:12:58 +0000] [18823] [ERROR] Worker (pid:22513) exited with code 1
+[2025-07-02 12:12:58 +0000] [18823] [ERROR] Worker (pid:22513) exited with code 1.
+[2025-07-02 12:12:58 +0000] [22519] [INFO] Booting worker with pid: 22519
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:58 +0000] [22519] [INFO] Worker exiting (pid: 22519)
+[2025-07-02 12:12:58 +0000] [18823] [ERROR] Worker (pid:22519) exited with code 1
+[2025-07-02 12:12:58 +0000] [18823] [ERROR] Worker (pid:22519) exited with code 1.
+[2025-07-02 12:12:58 +0000] [22525] [INFO] Booting worker with pid: 22525
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:58 +0000] [22525] [INFO] Worker exiting (pid: 22525)
+[2025-07-02 12:12:59 +0000] [18823] [ERROR] Worker (pid:22525) exited with code 1
+[2025-07-02 12:12:59 +0000] [18823] [ERROR] Worker (pid:22525) exited with code 1.
+[2025-07-02 12:12:59 +0000] [22531] [INFO] Booting worker with pid: 22531
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:59 +0000] [22531] [INFO] Worker exiting (pid: 22531)
+[2025-07-02 12:12:59 +0000] [18823] [ERROR] Worker (pid:22531) exited with code 1
+[2025-07-02 12:12:59 +0000] [18823] [ERROR] Worker (pid:22531) exited with code 1.
+[2025-07-02 12:12:59 +0000] [22537] [INFO] Booting worker with pid: 22537
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:12:59 +0000] [22537] [INFO] Worker exiting (pid: 22537)
+[2025-07-02 12:13:00 +0000] [18823] [ERROR] Worker (pid:22537) exited with code 1
+[2025-07-02 12:13:00 +0000] [18823] [ERROR] Worker (pid:22537) exited with code 1.
+[2025-07-02 12:13:00 +0000] [22543] [INFO] Booting worker with pid: 22543
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:13:00 +0000] [22543] [INFO] Worker exiting (pid: 22543)
+[2025-07-02 12:13:00 +0000] [18823] [ERROR] Worker (pid:22543) exited with code 1
+[2025-07-02 12:13:00 +0000] [18823] [ERROR] Worker (pid:22543) exited with code 1.
+[2025-07-02 12:13:00 +0000] [22549] [INFO] Booting worker with pid: 22549
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:13:01 +0000] [22549] [INFO] Worker exiting (pid: 22549)
+[2025-07-02 12:13:01 +0000] [18823] [ERROR] Worker (pid:22549) exited with code 1
+[2025-07-02 12:13:01 +0000] [18823] [ERROR] Worker (pid:22549) exited with code 1.
+[2025-07-02 12:13:01 +0000] [22555] [INFO] Booting worker with pid: 22555
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
+INFO:root:RADOS SECURITY: SYSTEM_STARTUP - System started under protection of Ervin Remus Radosavlevici
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.Generation, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/flask_sqlalchemy/model.py:214: SAWarning: This declarative base already contains a class with the same class name and module name as models.SecurityLog, and will be replaced in the string-lookup table.
+  super().__init_subclass__(**kwargs)
+Import error: No module named 'soundfile'
+[2025-07-02 12:13:01 +0000] [22555] [INFO] Worker exiting (pid: 22555)
+[2025-07-02 12:13:01 +0000] [18823] [ERROR] Worker (pid:22555) exited with code 1
+[2025-07-02 12:13:01 +0000] [18823] [ERROR] Worker (pid:22555) exited with code 1.
+[2025-07-02 12:13:01 +0000] [22561] [INFO] Booting worker with pid: 22561
+INFO:root:RADOS SECURITY: RADOS_INIT - RADOS Quantum Enforcement Policy v2.7 initialized
