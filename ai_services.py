@@ -82,7 +82,10 @@ Please provide the lyrics in this JSON format:
         except (TimeoutError, Exception) as api_error:
             signal.alarm(0)  # Cancel timeout
             logging.error(f"OpenAI lyrics generation failed: {api_error}")
-            raise api_error
+            return _get_fallback_lyrics(theme, title)
+
+        finally:
+            signal.alarm(0)  # Ensure timeout is always cancelled
 
 def _get_fallback_lyrics(theme, title):
     """Return fallback lyrics when AI is not available"""

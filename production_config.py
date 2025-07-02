@@ -49,10 +49,15 @@ class ProductionConfig:
         app.config['SEND_FILE_MAX_AGE_DEFAULT'] = timedelta(hours=1)
         app.config['PERMANENT_SESSION_LIFETIME'] = ProductionConfig.SESSION_TIMEOUT
         
-        # Apply security settings
-        app.config['SESSION_COOKIE_SECURE'] = True
+        # Apply security settings (only in production)
+        if not app.config.get('DEBUG', False):
+            app.config['SESSION_COOKIE_SECURE'] = True
         app.config['SESSION_COOKIE_HTTPONLY'] = True
         app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+        
+        # Apply production-specific settings
+        app.config['WTF_CSRF_TIME_LIMIT'] = 3600
+        app.config['MAX_CONTENT_LENGTH'] = ProductionConfig.MAX_FILE_SIZE
         
         return app
 

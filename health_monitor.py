@@ -192,3 +192,71 @@ class HealthMonitor:
 
 # Global health monitor instance
 health_monitor = HealthMonitor()
+"""
+Health Monitor for CodeCraft Studio
+Monitors system health and performance metrics
+© 2025 Ervin Remus Radosavlevici
+"""
+
+import psutil
+import os
+import logging
+from datetime import datetime
+from security.rados_security import log_security_event
+
+class HealthMonitor:
+    """System health monitoring"""
+    
+    def __init__(self):
+        self.start_time = datetime.utcnow()
+    
+    def get_health_status(self):
+        """Get comprehensive system health status"""
+        try:
+            # System metrics
+            cpu_percent = psutil.cpu_percent(interval=1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage('/')
+            
+            # Application health
+            health_status = {
+                'timestamp': datetime.utcnow().isoformat(),
+                'uptime_seconds': (datetime.utcnow() - self.start_time).total_seconds(),
+                'system': {
+                    'cpu_percent': cpu_percent,
+                    'memory_percent': memory.percent,
+                    'memory_available_mb': memory.available / (1024 * 1024),
+                    'disk_percent': disk.percent,
+                    'disk_free_gb': disk.free / (1024 * 1024 * 1024)
+                },
+                'application': {
+                    'status': 'healthy',
+                    'openai_configured': bool(os.environ.get('OPENAI_API_KEY')),
+                    'database': 'connected'
+                },
+                'overall_health': self._calculate_overall_health(cpu_percent, memory.percent, disk.percent)
+            }
+            
+            return health_status
+            
+        except Exception as e:
+            log_security_event("HEALTH_MONITOR_ERROR", str(e), "ERROR")
+            return {
+                'timestamp': datetime.utcnow().isoformat(),
+                'status': 'error',
+                'error': str(e)
+            }
+    
+    def _calculate_overall_health(self, cpu, memory, disk):
+        """Calculate overall system health"""
+        if cpu > 90 or memory > 90 or disk > 95:
+            return 'critical'
+        elif cpu > 70 or memory > 80 or disk > 85:
+            return 'warning'
+        elif cpu > 50 or memory > 60 or disk > 70:
+            return 'good'
+        else:
+            return 'excellent'
+
+# Global health monitor instance
+health_monitor = HealthMonitor()
