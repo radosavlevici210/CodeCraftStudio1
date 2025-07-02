@@ -4,7 +4,7 @@ Handles all web requests and API endpoints
 © 2025 Ervin Remus Radosavlevici
 """
 
-from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session
+from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session, Blueprint
 from app import app, db
 from models import Generation, SecurityLog
 from ai_agent import InvictusAIAgent
@@ -17,8 +17,13 @@ import os
 import json
 import uuid
 import logging
-from health_monitor import health_monitor # Added import
-from analytics import analytics # Added import
+import time
+from datetime import datetime
+from health_monitor import health_monitor
+from analytics import analytics
+
+# Create blueprint for routes
+main_bp = Blueprint('main', __name__)
 
 # Initialize all systems
 ai_agent = InvictusAIAgent()
@@ -26,7 +31,7 @@ youtube_uploader = YouTubeUploader()
 audio_mixer = AdvancedAudioMixer()
 voice_trainer = VoiceTrainingSystem()
 
-@app.route('/')
+@main_bp.route('/')
 def index():
     """Main page"""
     try:
@@ -36,8 +41,8 @@ def index():
         recent_generations = Generation.query.filter_by(status='completed').order_by(Generation.created_at.desc()).limit(5).all()
 
         # Get system health
-        system_health = health_monitor.get_health_status() # Modified to use health_monitor
-        analytics_summary = analytics.get_analytics_summary() # Modified to use analytics
+        system_health = health_monitor.get_health_status()
+        analytics_summary = analytics.get_analytics_summary()
 
         # Get statistics
         stats = ai_agent.get_generation_statistics()
@@ -46,7 +51,7 @@ def index():
                              recent_generations=recent_generations,
                              system_health=system_health,
                              stats=stats,
-                             analytics=analytics_summary) # Added analytics to template
+                             analytics=analytics_summary)
     except Exception as e:
         log_security_event("INDEX_ERROR", str(e), "ERROR")
         flash("An error occurred loading the page", "error")
@@ -55,7 +60,7 @@ def index():
                              system_health={},
                              stats={})
 
-@app.route('/generate', methods=['GET', 'POST'])
+@main_bp.route('/generate', methods=['GET', 'POST'])
 def generate():
     """Generation page"""
     try:
@@ -96,7 +101,7 @@ def generate():
                     signal.alarm(0)  # Cancel timeout
 
                     flash("Generation completed successfully!", "success")
-                    return redirect(url_for('results', generation_id=result['id']))
+                    return redirect(url_for('main.results', generation_id=result['id']))
 
                 except TimeoutError:
                     signal.alarm(0)
@@ -129,7 +134,7 @@ def generate():
         flash("An error occurred", "error")
         return render_template('generate.html')
 
-@app.route('/results/<int:generation_id>')
+@main_bp.route('/results/<int:generation_id>')
 def results(generation_id):
     """Results page"""
     try:
@@ -142,8 +147,8 @@ def results(generation_id):
         lyrics_data = generation.get_lyrics_data()
 
         # Check if files exist
-        audio_exists = generation.audio_file and os.path.exists(generation.audio_file)
-        video_exists = generation.video_file and os.path.exists(generation.video_file)
+        audio_exists = generation.audio_file and os.path.exists(f"static/audio/{generation.audio_file}")
+        video_exists = generation.video_file and os.path.exists(f"static/video/{generation.video_file}")
 
         return render_template('results.html',
                              generation=generation,
@@ -154,9 +159,9 @@ def results(generation_id):
     except Exception as e:
         log_security_event("RESULTS_PAGE_ERROR", str(e), "ERROR")
         flash("Could not load results", "error")
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
-@app.route('/download/<int:generation_id>/<file_type>')
+@main_bp.route('/download/<int:generation_id>/<file_type>')
 def download(generation_id, file_type):
     """Download generated files"""
     try:
@@ -165,24 +170,26 @@ def download(generation_id, file_type):
         generation = Generation.query.get_or_404(generation_id)
 
         if file_type == 'audio' and generation.audio_file:
-            if os.path.exists(generation.audio_file):
+            file_path = f"static/audio/{generation.audio_file}"
+            if os.path.exists(file_path):
                 log_security_event("FILE_DOWNLOAD", f"Audio: {generation.audio_file}")
-                return send_file(generation.audio_file, as_attachment=True)
+                return send_file(file_path, as_attachment=True)
 
         elif file_type == 'video' and generation.video_file:
-            if os.path.exists(generation.video_file):
+            file_path = f"static/video/{generation.video_file}"
+            if os.path.exists(file_path):
                 log_security_event("FILE_DOWNLOAD", f"Video: {generation.video_file}")
-                return send_file(generation.video_file, as_attachment=True)
+                return send_file(file_path, as_attachment=True)
 
         flash("File not found", "error")
-        return redirect(url_for('results', generation_id=generation_id))
+        return redirect(url_for('main.results', generation_id=generation_id))
 
     except Exception as e:
         log_security_event("DOWNLOAD_ERROR", str(e), "ERROR")
         flash("Download failed", "error")
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
-@app.route('/gallery')
+@main_bp.route('/gallery')
 def gallery():
     """Gallery of all generations"""
     try:
@@ -202,9 +209,9 @@ def gallery():
     except Exception as e:
         log_security_event("GALLERY_ERROR", str(e), "ERROR")
         flash("Could not load gallery", "error")
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
 
-@app.route('/health')
+@main_bp.route('/health')
 def health_check():
     """Production health check endpoint"""
     try:
@@ -214,7 +221,7 @@ def health_check():
         log_security_event("HEALTH_CHECK_ERROR", str(e), "ERROR")
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
-@app.route('/analytics')
+@main_bp.route('/analytics')
 def analytics_dashboard():
     """Production analytics dashboard"""
     try:
@@ -224,7 +231,7 @@ def analytics_dashboard():
         log_security_event("ANALYTICS_ERROR", str(e), "ERROR")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/status')
+@main_bp.route('/status')
 def system_status():
     """Comprehensive system status"""
     try:
@@ -241,7 +248,7 @@ def system_status():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/stats')
+@main_bp.route('/stats')
 def stats():
     """Statistics endpoint"""
     try:
@@ -253,7 +260,7 @@ def stats():
 
 # ============= ADVANCED FEATURES API ENDPOINTS =============
 
-@app.route('/api/youtube/upload', methods=['POST'])
+@main_bp.route('/api/youtube/upload', methods=['POST'])
 def youtube_upload():
     """YouTube upload API endpoint"""
     try:
@@ -280,8 +287,7 @@ def youtube_upload():
         }
 
         package = youtube_uploader.prepare_upload_package(generation_data)
-        result =```python
- youtube_uploader.simulate_youtube_upload(package)
+        result = youtube_uploader.simulate_youtube_upload(package)
 
         log_security_event("YOUTUBE_UPLOAD_REQUEST", f"Generation: {generation_id}")
         return jsonify(result)
@@ -290,7 +296,7 @@ def youtube_upload():
         log_security_event("YOUTUBE_UPLOAD_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/collaboration/create', methods=['POST'])
+@main_bp.route('/api/collaboration/create', methods=['POST'])
 def create_collaboration():
     """Create collaborative session"""
     try:
@@ -323,57 +329,7 @@ def create_collaboration():
         log_security_event("COLLABORATION_CREATE_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/collaboration/join', methods=['POST'])
-def join_collaboration():
-    """Join collaborative session"""
-    try:
-        enforce_rados_protection()
-
-        session_id = request.json.get('session_id')
-        user_name = request.json.get('user_name', 'Anonymous')
-
-        if not session_id:
-            return jsonify({"error": "Session ID required"}), 400
-
-        if 'user_id' not in session:
-            session['user_id'] = str(uuid.uuid4())
-
-        user_id = session['user_id']
-
-        collaboration_system.join_collaborative_session(session_id, user_id, user_name)
-
-        log_security_event("COLLABORATION_JOINED", f"Session: {session_id}")
-        return jsonify({
-            "session_id": session_id,
-            "user_id": user_id,
-            "status": "joined"
-        })
-
-    except Exception as e:
-        log_security_event("COLLABORATION_JOIN_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/collaboration/updates/<session_id>')
-def get_collaboration_updates(session_id):
-    """Get live collaboration updates"""
-    try:
-        enforce_rados_protection()
-
-        if 'user_id' not in session:
-            return jsonify({"error": "User not authenticated"}), 401
-
-        user_id = session['user_id']
-        last_update_id = request.args.get('last_update_id')
-
-        updates = collaboration_system.get_live_updates(session_id, user_id, last_update_id)
-
-        return jsonify({"updates": updates})
-
-    except Exception as e:
-        log_security_event("COLLABORATION_UPDATES_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/audio/mix', methods=['POST'])
+@main_bp.route('/api/audio/mix', methods=['POST'])
 def create_audio_mix():
     """Create professional audio mix"""
     try:
@@ -394,7 +350,7 @@ def create_audio_mix():
         log_security_event("AUDIO_MIX_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/voice/train', methods=['POST'])
+@main_bp.route('/api/voice/train', methods=['POST'])
 def train_custom_voice():
     """Train custom voice model"""
     try:
@@ -418,182 +374,9 @@ def train_custom_voice():
         log_security_event("VOICE_TRAINING_ERROR", str(e), "ERROR")
         return jsonify({"error": str(e)}), 500
 
-@app.route('/api/voice/synthesize', methods=['POST'])
-def synthesize_custom_voice():
-    """Synthesize speech with custom voice"""
-    try:
-        enforce_rados_protection()
+# ============= ERROR HANDLERS =============
 
-        text = request.json.get('text')
-        voice_model_id = request.json.get('voice_model_id')
-        emotion = request.json.get('emotion', 'neutral')
-
-        if not text or not voice_model_id:
-            return jsonify({"error": "Text and voice model ID required"}), 400
-
-        audio_file = voice_trainer.synthesize_with_custom_voice(text, voice_model_id, emotion)
-
-        log_security_event("CUSTOM_VOICE_SYNTHESIS", f"Model: {voice_model_id}")
-        return jsonify({
-            "audio_file": audio_file,
-            "voice_model_id": voice_model_id,
-            "emotion": emotion
-        })
-
-    except Exception as e:
-        log_security_event("CUSTOM_VOICE_SYNTHESIS_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/voice/evaluate', methods=['POST'])
-def evaluate_voice_quality():
-    """Evaluate custom voice quality"""
-    try:
-        enforce_rados_protection()
-
-        voice_model_id = request.json.get('voice_model_id')
-        test_texts = request.json.get('test_texts', [
-            "This is a test of the voice quality evaluation system.",
-            "The quick brown fox jumps over the lazy dog.",
-            "Artificial intelligence is transforming the world of audio synthesis."
-        ])
-
-        if not voice_model_id:
-            return jsonify({"error": "Voice model ID required"}), 400
-
-        evaluation_results = voice_trainer.evaluate_voice_quality(voice_model_id, test_texts)
-
-        log_security_event("VOICE_QUALITY_EVALUATION", f"Model: {voice_model_id}")
-        return jsonify(evaluation_results)
-
-    except Exception as e:
-        log_security_event("VOICE_EVALUATION_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/youtube/analytics/<video_id>')
-def get_youtube_analytics(video_id):
-    """Get YouTube video analytics"""
-    try:
-        enforce_rados_protection()
-
-        analytics = youtube_uploader.get_upload_analytics(video_id)
-
-        return jsonify(analytics)
-
-    except Exception as e:
-        log_security_event("YOUTUBE_ANALYTICS_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-@app.route('/api/collaboration/analytics/<session_id>')
-def get_collaboration_analytics(session_id):
-    """Get collaboration session analytics"""
-    try:
-        enforce_rados_protection()
-
-        analytics = collaboration_system.get_session_analytics(session_id)
-
-        return jsonify(analytics)
-
-    except Exception as e:
-        log_security_event("COLLABORATION_ANALYTICS_ERROR", str(e), "ERROR")
-        return jsonify({"error": str(e)}), 500
-
-# ============= ADVANCED FEATURES WEB PAGES =============
-
-@app.route('/collaboration')
-def collaboration_page():
-    """Collaboration dashboard page"""
-    try:
-        enforce_rados_protection()
-
-        # Get user's active sessions
-        user_id = session.get('user_id')
-        active_sessions = []
-
-        if user_id:
-            # Get active collaboration sessions for user
-            for session_id, session_data in collaboration_system.active_sessions.items():
-                if any(p['id'] == user_id for p in session_data['participants']):
-                    active_sessions.append({
-                        'id': session_id,
-                        'generation_id': session_data['generation_id'],
-                        'participants': len(session_data['participants']),
-                        'created_at': session_data['created_at']
-                    })
-
-        return render_template('collaboration.html', active_sessions=active_sessions)
-
-    except Exception as e:
-        log_security_event("COLLABORATION_PAGE_ERROR", str(e), "ERROR")
-        flash("Could not load collaboration page", "error")
-        return redirect(url_for('index'))
-
-@app.route('/voice-training')
-def voice_training_page():
-    """Voice training dashboard page"""
-    try:
-        enforce_rados_protection()
-
-        # Get available voice models
-        voice_models = []
-        models_dir = 'static/voice_models'
-
-        if os.path.exists(models_dir):
-            for filename in os.listdir(models_dir):
-                if filename.endswith('.json'):
-                    try:
-                        with open(os.path.join(models_dir, filename), 'r') as f:
-                            model_data = json.load(f)
-                            voice_models.append({
-                                'name': model_data.get('voice_name', 'Unknown'),
-                                'id': model_data.get('model_id', filename),
-                                'quality': model_data.get('model_info', {}).get('quality_score', 0),
-                                'created_at': model_data.get('created_at', '')
-                            })
-                    except:
-                        continue
-
-        return render_template('voice_training.html', voice_models=voice_models)
-
-    except Exception as e:
-        log_security_event("VOICE_TRAINING_PAGE_ERROR", str(e), "ERROR")
-        flash("Could not load voice training page", "error")
-        return redirect(url_for('index'))
-
-@app.route('/audio-mixer')
-def audio_mixer_page():
-    """Audio mixer dashboard page"""
-    try:
-        enforce_rados_protection()
-
-        # Get recent mixes
-        recent_mixes = []
-        mixing_dir = 'static/mixing'
-
-        if os.path.exists(mixing_dir):
-            for filename in os.listdir(mixing_dir):
-                if filename.startswith('session_') and filename.endswith('.json'):
-                    try:
-                        with open(os.path.join(mixing_dir, filename), 'r') as f:
-                            session_data = json.load(f)
-                            recent_mixes.append({
-                                'id': session_data.get('id', 'Unknown'),
-                                'style': session_data.get('style', 'Unknown'),
-                                'tracks': len(session_data.get('tracks', [])),
-                                'created_at': session_data.get('created_at', '')
-                            })
-                    except:
-                        continue
-
-        return render_template('audio_mixer.html', 
-                             recent_mixes=recent_mixes,
-                             mixing_presets=list(audio_mixer.mixing_presets.keys()))
-
-    except Exception as e:
-        log_security_event("AUDIO_MIXER_PAGE_ERROR", str(e), "ERROR")
-        flash("Could not load audio mixer page", "error")
-        return redirect(url_for('index'))
-
-@app.errorhandler(404)
+@main_bp.errorhandler(404)
 def not_found(error):
     """404 error handler"""
     log_security_event("404_ERROR", request.url)
@@ -601,7 +384,7 @@ def not_found(error):
                          error_code=404, 
                          error_message="Page not found"), 404
 
-@app.errorhandler(500)
+@main_bp.errorhandler(500)
 def internal_error(error):
     """500 error handler"""
     log_security_event("500_ERROR", str(error), "ERROR")
@@ -611,7 +394,7 @@ def internal_error(error):
                          error_message="Internal server error"), 500
 
 # Context processor for global template variables
-@app.context_processor
+@main_bp.context_processor
 def inject_global_vars():
     """Inject global variables into templates"""
     return {
@@ -620,3 +403,6 @@ def inject_global_vars():
         'copyright': '© 2025 Ervin Remus Radosavlevici',
         'license': 'Radosavlevici Game License v1.0'
     }
+
+# Register the blueprint
+app.register_blueprint(main_bp)

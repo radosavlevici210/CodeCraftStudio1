@@ -13,6 +13,8 @@ import numpy as np
 from datetime import datetime
 from security.rados_security import log_security_event, watermark_content
 from openai import OpenAI
+from gtts import gTTS
+from pydub import AudioSegment
 
 class VoiceTrainingSystem:
     """Advanced custom voice training and synthesis system"""
@@ -89,6 +91,10 @@ class VoiceTrainingSystem:
         os.makedirs('static/voice_training', exist_ok=True)
         os.makedirs('static/voice_models', exist_ok=True)
         os.makedirs('logs/voice_training', exist_ok=True)
+
+        self.training_sessions = {}
+        self.model_directory = 'static/voice_models'
+        os.makedirs(self.model_directory, exist_ok=True)
 
     def create_custom_voice_model(self, voice_name, training_samples, target_characteristics):
         """Create a custom voice model from training samples"""
@@ -785,16 +791,4 @@ class VoiceTrainingSystem:
             'base_pitch': analysis['fundamental_frequency'],
             'pitch_range': analysis['pitch_variance'],
             'speaking_rate': analysis['speaking_rate'],
-            'tone_characteristics': analysis['vocal_timbre'],
-            'emotional_range': analysis['emotional_baseline']
-        }
-
-    def create_cloned_voice_model(self, voice_name, characteristics):
-        """Create voice model from cloned characteristics"""
-        return {
-            'voice_name': voice_name,
-            'type': 'cloned',
-            'characteristics': characteristics,
-            'created_at': datetime.utcnow().isoformat(),
-            'quality_score': np.random.uniform(0.8, 0.95)
-        }
+            'tone_characteristics':
