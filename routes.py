@@ -191,6 +191,347 @@ def stats():
         log_security_event("STATS_ERROR", str(e), "ERROR")
         return jsonify({"error": "Could not load statistics"}), 500
 
+# ============= ADVANCED FEATURES API ENDPOINTS =============
+
+@app.route('/api/youtube/upload', methods=['POST'])
+def youtube_upload():
+    """YouTube upload API endpoint"""
+    try:
+        enforce_rados_protection()
+        
+        generation_id = request.json.get('generation_id')
+        if not generation_id:
+            return jsonify({"error": "Generation ID required"}), 400
+        
+        generation = Generation.query.get(generation_id)
+        if not generation:
+            return jsonify({"error": "Generation not found"}), 404
+        
+        # Prepare upload package
+        generation_data = {
+            'id': generation.id,
+            'title': generation.title,
+            'theme': generation.theme,
+            'music_style': generation.music_style,
+            'voice_style': generation.voice_style,
+            'lyrics_data': generation.get_lyrics_data(),
+            'audio_file': generation.audio_file,
+            'video_file': generation.video_file
+        }
+        
+        package = youtube_uploader.prepare_upload_package(generation_data)
+        result = youtube_uploader.simulate_youtube_upload(package)
+        
+        log_security_event("YOUTUBE_UPLOAD_REQUEST", f"Generation: {generation_id}")
+        return jsonify(result)
+        
+    except Exception as e:
+        log_security_event("YOUTUBE_UPLOAD_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/collaboration/create', methods=['POST'])
+def create_collaboration():
+    """Create collaborative session"""
+    try:
+        enforce_rados_protection()
+        
+        generation_id = request.json.get('generation_id')
+        user_name = request.json.get('user_name', 'Anonymous')
+        
+        if not generation_id:
+            return jsonify({"error": "Generation ID required"}), 400
+        
+        # Create user session if not exists
+        if 'user_id' not in session:
+            session['user_id'] = str(uuid.uuid4())
+        
+        user_id = session['user_id']
+        
+        session_id = collaboration_system.create_collaborative_session(
+            generation_id, user_id, user_name
+        )
+        
+        log_security_event("COLLABORATION_CREATED", f"Session: {session_id}")
+        return jsonify({
+            "session_id": session_id,
+            "user_id": user_id,
+            "status": "created"
+        })
+        
+    except Exception as e:
+        log_security_event("COLLABORATION_CREATE_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/collaboration/join', methods=['POST'])
+def join_collaboration():
+    """Join collaborative session"""
+    try:
+        enforce_rados_protection()
+        
+        session_id = request.json.get('session_id')
+        user_name = request.json.get('user_name', 'Anonymous')
+        
+        if not session_id:
+            return jsonify({"error": "Session ID required"}), 400
+        
+        if 'user_id' not in session:
+            session['user_id'] = str(uuid.uuid4())
+        
+        user_id = session['user_id']
+        
+        collaboration_system.join_collaborative_session(session_id, user_id, user_name)
+        
+        log_security_event("COLLABORATION_JOINED", f"Session: {session_id}")
+        return jsonify({
+            "session_id": session_id,
+            "user_id": user_id,
+            "status": "joined"
+        })
+        
+    except Exception as e:
+        log_security_event("COLLABORATION_JOIN_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/collaboration/updates/<session_id>')
+def get_collaboration_updates(session_id):
+    """Get live collaboration updates"""
+    try:
+        enforce_rados_protection()
+        
+        if 'user_id' not in session:
+            return jsonify({"error": "User not authenticated"}), 401
+        
+        user_id = session['user_id']
+        last_update_id = request.args.get('last_update_id')
+        
+        updates = collaboration_system.get_live_updates(session_id, user_id, last_update_id)
+        
+        return jsonify({"updates": updates})
+        
+    except Exception as e:
+        log_security_event("COLLABORATION_UPDATES_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/audio/mix', methods=['POST'])
+def create_audio_mix():
+    """Create professional audio mix"""
+    try:
+        enforce_rados_protection()
+        
+        audio_tracks = request.json.get('tracks', [])
+        mixing_style = request.json.get('style', 'cinematic_epic')
+        
+        if not audio_tracks:
+            return jsonify({"error": "Audio tracks required"}), 400
+        
+        mix_result = audio_mixer.create_professional_mix(audio_tracks, mixing_style)
+        
+        log_security_event("AUDIO_MIX_CREATED", f"Style: {mixing_style}")
+        return jsonify(mix_result)
+        
+    except Exception as e:
+        log_security_event("AUDIO_MIX_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/train', methods=['POST'])
+def train_custom_voice():
+    """Train custom voice model"""
+    try:
+        enforce_rados_protection()
+        
+        voice_name = request.json.get('voice_name')
+        training_samples = request.json.get('training_samples', [])
+        target_characteristics = request.json.get('target_characteristics', {})
+        
+        if not voice_name or not training_samples:
+            return jsonify({"error": "Voice name and training samples required"}), 400
+        
+        model_package = voice_trainer.create_custom_voice_model(
+            voice_name, training_samples, target_characteristics
+        )
+        
+        log_security_event("VOICE_TRAINING_COMPLETED", f"Voice: {voice_name}")
+        return jsonify(model_package)
+        
+    except Exception as e:
+        log_security_event("VOICE_TRAINING_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/synthesize', methods=['POST'])
+def synthesize_custom_voice():
+    """Synthesize speech with custom voice"""
+    try:
+        enforce_rados_protection()
+        
+        text = request.json.get('text')
+        voice_model_id = request.json.get('voice_model_id')
+        emotion = request.json.get('emotion', 'neutral')
+        
+        if not text or not voice_model_id:
+            return jsonify({"error": "Text and voice model ID required"}), 400
+        
+        audio_file = voice_trainer.synthesize_with_custom_voice(text, voice_model_id, emotion)
+        
+        log_security_event("CUSTOM_VOICE_SYNTHESIS", f"Model: {voice_model_id}")
+        return jsonify({
+            "audio_file": audio_file,
+            "voice_model_id": voice_model_id,
+            "emotion": emotion
+        })
+        
+    except Exception as e:
+        log_security_event("CUSTOM_VOICE_SYNTHESIS_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/voice/evaluate', methods=['POST'])
+def evaluate_voice_quality():
+    """Evaluate custom voice quality"""
+    try:
+        enforce_rados_protection()
+        
+        voice_model_id = request.json.get('voice_model_id')
+        test_texts = request.json.get('test_texts', [
+            "This is a test of the voice quality evaluation system.",
+            "The quick brown fox jumps over the lazy dog.",
+            "Artificial intelligence is transforming the world of audio synthesis."
+        ])
+        
+        if not voice_model_id:
+            return jsonify({"error": "Voice model ID required"}), 400
+        
+        evaluation_results = voice_trainer.evaluate_voice_quality(voice_model_id, test_texts)
+        
+        log_security_event("VOICE_QUALITY_EVALUATION", f"Model: {voice_model_id}")
+        return jsonify(evaluation_results)
+        
+    except Exception as e:
+        log_security_event("VOICE_EVALUATION_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/youtube/analytics/<video_id>')
+def get_youtube_analytics(video_id):
+    """Get YouTube video analytics"""
+    try:
+        enforce_rados_protection()
+        
+        analytics = youtube_uploader.get_upload_analytics(video_id)
+        
+        return jsonify(analytics)
+        
+    except Exception as e:
+        log_security_event("YOUTUBE_ANALYTICS_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/collaboration/analytics/<session_id>')
+def get_collaboration_analytics(session_id):
+    """Get collaboration session analytics"""
+    try:
+        enforce_rados_protection()
+        
+        analytics = collaboration_system.get_session_analytics(session_id)
+        
+        return jsonify(analytics)
+        
+    except Exception as e:
+        log_security_event("COLLABORATION_ANALYTICS_ERROR", str(e), "ERROR")
+        return jsonify({"error": str(e)}), 500
+
+# ============= ADVANCED FEATURES WEB PAGES =============
+
+@app.route('/collaboration')
+def collaboration_page():
+    """Collaboration dashboard page"""
+    try:
+        enforce_rados_protection()
+        
+        # Get user's active sessions
+        user_id = session.get('user_id')
+        active_sessions = []
+        
+        if user_id:
+            # Get active collaboration sessions for user
+            for session_id, session_data in collaboration_system.active_sessions.items():
+                if any(p['id'] == user_id for p in session_data['participants']):
+                    active_sessions.append({
+                        'id': session_id,
+                        'generation_id': session_data['generation_id'],
+                        'participants': len(session_data['participants']),
+                        'created_at': session_data['created_at']
+                    })
+        
+        return render_template('collaboration.html', active_sessions=active_sessions)
+        
+    except Exception as e:
+        log_security_event("COLLABORATION_PAGE_ERROR", str(e), "ERROR")
+        flash("Could not load collaboration page", "error")
+        return redirect(url_for('index'))
+
+@app.route('/voice-training')
+def voice_training_page():
+    """Voice training dashboard page"""
+    try:
+        enforce_rados_protection()
+        
+        # Get available voice models
+        voice_models = []
+        models_dir = 'static/voice_models'
+        
+        if os.path.exists(models_dir):
+            for filename in os.listdir(models_dir):
+                if filename.endswith('.json'):
+                    try:
+                        with open(os.path.join(models_dir, filename), 'r') as f:
+                            model_data = json.load(f)
+                            voice_models.append({
+                                'name': model_data.get('voice_name', 'Unknown'),
+                                'id': model_data.get('model_id', filename),
+                                'quality': model_data.get('model_info', {}).get('quality_score', 0),
+                                'created_at': model_data.get('created_at', '')
+                            })
+                    except:
+                        continue
+        
+        return render_template('voice_training.html', voice_models=voice_models)
+        
+    except Exception as e:
+        log_security_event("VOICE_TRAINING_PAGE_ERROR", str(e), "ERROR")
+        flash("Could not load voice training page", "error")
+        return redirect(url_for('index'))
+
+@app.route('/audio-mixer')
+def audio_mixer_page():
+    """Audio mixer dashboard page"""
+    try:
+        enforce_rados_protection()
+        
+        # Get recent mixes
+        recent_mixes = []
+        mixing_dir = 'static/mixing'
+        
+        if os.path.exists(mixing_dir):
+            for filename in os.listdir(mixing_dir):
+                if filename.startswith('session_') and filename.endswith('.json'):
+                    try:
+                        with open(os.path.join(mixing_dir, filename), 'r') as f:
+                            session_data = json.load(f)
+                            recent_mixes.append({
+                                'id': session_data.get('id', 'Unknown'),
+                                'style': session_data.get('style', 'Unknown'),
+                                'tracks': len(session_data.get('tracks', [])),
+                                'created_at': session_data.get('created_at', '')
+                            })
+                    except:
+                        continue
+        
+        return render_template('audio_mixer.html', 
+                             recent_mixes=recent_mixes,
+                             mixing_presets=list(audio_mixer.mixing_presets.keys()))
+        
+    except Exception as e:
+        log_security_event("AUDIO_MIXER_PAGE_ERROR", str(e), "ERROR")
+        flash("Could not load audio mixer page", "error")
+        return redirect(url_for('index'))
+
 @app.errorhandler(404)
 def not_found(error):
     """404 error handler"""
