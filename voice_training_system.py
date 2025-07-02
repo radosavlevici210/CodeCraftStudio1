@@ -214,30 +214,47 @@ class VoiceTrainingSystem:
         try:
             print("🤖 Generating AI training strategy...")
             
-            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
-            # do not change this unless explicitly requested by the user
-            response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert in voice synthesis and AI model training. "
-                                   "Create a comprehensive training strategy for custom voice models. "
-                                   "Focus on technical parameters, training methodology, and quality optimization. "
-                                   "Respond with JSON containing: training_parameters, data_augmentation, "
-                                   "model_architecture, and optimization_strategy."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Create training strategy for voice with characteristics: {target_characteristics}. "
-                                   f"Sample analysis: {json.dumps(sample_analysis, default=str)}"
-                    }
-                ],
-                response_format={"type": "json_object"}
-            )
+            # Add timeout protection
+            import signal
             
-            ai_strategy = json.loads(response.choices[0].message.content)
-            return ai_strategy
+            def timeout_handler(signum, frame):
+                raise TimeoutError("OpenAI API call timed out")
+            
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(8)  # 8 second timeout
+            
+            try:
+                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+                # do not change this unless explicitly requested by the user
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are an expert in voice synthesis and AI model training. "
+                                       "Create a comprehensive training strategy for custom voice models. "
+                                       "Focus on technical parameters, training methodology, and quality optimization. "
+                                       "Respond with JSON containing: training_parameters, data_augmentation, "
+                                       "model_architecture, and optimization_strategy."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Create training strategy for voice with characteristics: {target_characteristics}. "
+                                       f"Sample analysis: {json.dumps(sample_analysis, default=str)}"
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                    timeout=6.0  # 6 second timeout
+                )
+                
+                ai_strategy = json.loads(response.choices[0].message.content)
+                signal.alarm(0)  # Cancel timeout
+                return ai_strategy
+                
+            except (TimeoutError, Exception) as api_error:
+                signal.alarm(0)  # Cancel timeout
+                logging.warning(f"OpenAI training strategy failed: {api_error}")
+                raise api_error
             
         except Exception as e:
             logging.warning(f"AI training strategy generation failed: {e}")

@@ -19,69 +19,70 @@ else:
     openai_client = None
     logging.warning("OpenAI API key not found. AI features will be limited.")
 
-def generate_lyrics(theme, title="Invictus Aeternum"):
-    """Generate lyrics based on theme using OpenAI"""
+def generate_lyrics(theme, title):
+    """Generate lyrics using OpenAI API"""
     try:
-        log_security_event("LYRICS_GENERATION_START", f"Theme: {theme}, Title: {title}")
-        
-        if not openai_client:
-            log_security_event("LYRICS_GENERATION_FALLBACK", "Using fallback lyrics - OpenAI not available")
-            return _get_fallback_lyrics(theme, title)
-        
-        prompt = f"""
-        Generate powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
-        
-        The lyrics should be:
-        - Epic and inspiring
-        - Suitable for orchestral/cinematic music
-        - Include verses, chorus, and bridge sections
-        - Have timing information for video synchronization
-        - Include Latin phrases where appropriate for grandeur
-        
-        Return the response as JSON with this structure:
-        {{
-            "title": "{title}",
-            "theme": "{theme}",
-            "full_text": "complete lyrics as one string",
-            "verses": [
-                {{
-                    "type": "verse",
-                    "lyrics": "verse lyrics here",
-                    "timing": "0:30"
-                }},
-                {{
-                    "type": "chorus", 
-                    "lyrics": "chorus lyrics here",
-                    "timing": "0:30-1:00"
-                }}
-            ],
-            "structure": ["verse", "chorus", "verse", "chorus", "bridge", "chorus"],
-            "mood": "heroic/epic/emotional",
-            "latin_phrases": ["phrase1", "phrase2"]
-        }}
-        """
-        
-        response = openai_client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a professional lyricist specializing in epic, cinematic music. Generate lyrics that are suitable for orchestral arrangements and video synchronization."},
-                {"role": "user", "content": prompt}
-            ],
-            response_format={"type": "json_object"},
-            max_tokens=1500,
-            timeout=15
-        )
-        
-        if response.choices[0].message.content:
-            lyrics_data = json.loads(response.choices[0].message.content)
-            log_security_event("LYRICS_GENERATION_SUCCESS", f"Generated lyrics for: {title}")
-            return lyrics_data
-        else:
-            raise Exception("Empty response from OpenAI")
-        
-    except Exception as e:
-        log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
-        return _get_fallback_lyrics(theme, title)
+        # Enhanced prompt for better lyric generation
+        prompt = f"""Create powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
+
+Generate lyrics that are:
+- Epic and emotionally resonant
+- Suitable for orchestral/cinematic music
+- Structured with verses and choruses
+- Inspiring and uplifting
+
+Theme: {theme}
+Title: {title}
+
+Please provide the lyrics in this JSON format:
+{{
+    "title": "{title}",
+    "theme": "{theme}",
+    "verses": [
+        {{"type": "verse", "lyrics": "verse 1 lyrics here", "timing": "0:30"}},
+        {{"type": "chorus", "lyrics": "chorus lyrics here", "timing": "30:60"}},
+        {{"type": "verse", "lyrics": "verse 2 lyrics here", "timing": "60:90"}},
+        {{"type": "chorus", "lyrics": "chorus lyrics here", "timing": "90:120"}},
+        {{"type": "bridge", "lyrics": "bridge lyrics here", "timing": "120:150"}},
+        {{"type": "chorus", "lyrics": "final chorus lyrics here", "timing": "150:180"}}
+    ],
+    "full_text": "complete song lyrics as one text"
+}}"""
+
+        client = openai.OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+
+        # Add timeout to prevent worker timeouts
+        import signal
+
+        def timeout_handler(signum, frame):
+            raise TimeoutError("OpenAI API call timed out")
+
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(15)  # 15 second timeout for lyrics
+
+        try:
+            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+            # do not change this unless explicitly requested by the user
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a master lyricist who creates epic, cinematic song lyrics. Always respond with valid JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"},
+                timeout=12.0  # 12 second timeout
+            )
+
+            result = json.loads(response.choices[0].message.content)
+            signal.alarm(0)  # Cancel timeout
+            log_security_event("LYRICS_GENERATED", f"Theme: {theme}, Title: {title}")
+
+            return result
+
+        except (TimeoutError, Exception) as api_error:
+            signal.alarm(0)  # Cancel timeout
+            logging.error(f"OpenAI lyrics generation failed: {api_error}")
+            raise api_error
 
 def _get_fallback_lyrics(theme, title):
     """Return fallback lyrics when AI is not available"""
@@ -111,7 +112,7 @@ def enhance_music_prompt(lyrics_data, music_style):
     try:
         lyrics_text = lyrics_data.get('full_text', '')
         mood = lyrics_data.get('mood', 'heroic')
-        
+
         # Use optimized fallback to prevent blocking
         log_security_event("MUSIC_ENHANCEMENT_FALLBACK", "Using optimized enhancement for performance")
         return {
@@ -120,7 +121,7 @@ def enhance_music_prompt(lyrics_data, music_style):
             "effects": "Reverb, chorus, orchestral processing",
             "notes": f"Professional {music_style} production"
         }
-        
+
     except Exception as e:
         log_security_event("MUSIC_ENHANCEMENT_ERROR", str(e), "ERROR")
         return {

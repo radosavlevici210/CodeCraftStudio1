@@ -151,29 +151,47 @@ class VideoGenerator:
         try:
             print(f"🤖 AI enhancing scene: {scene_description}")
             
-            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
-            # do not change this unless explicitly requested by the user
-            response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a master cinematographer and visual director. "
-                                   "Enhance scene descriptions for cinematic video generation. "
-                                   "Focus on lighting, composition, color palette, and emotional impact. "
-                                   "Respond with JSON containing: visual_prompt, lighting_style, "
-                                   "color_palette, camera_angle, and emotional_tone."
-                    },
-                    {
-                        "role": "user",  
-                        "content": f"Enhance this {scene_type} scene for cinematic impact: {scene_description}"
-                    }
-                ],
-                response_format={"type": "json_object"}
-            )
+            # Configure timeout to prevent worker timeouts
+            import signal
             
-            enhanced_data = json.loads(response.choices[0].message.content)
-            return enhanced_data
+            def timeout_handler(signum, frame):
+                raise TimeoutError("OpenAI API call timed out")
+            
+            # Set 10 second timeout
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(10)
+            
+            try:
+                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+                # do not change this unless explicitly requested by the user
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a master cinematographer and visual director. "
+                                       "Enhance scene descriptions for cinematic video generation. "
+                                       "Focus on lighting, composition, color palette, and emotional impact. "
+                                       "Respond with JSON containing: visual_prompt, lighting_style, "
+                                       "color_palette, camera_angle, and emotional_tone."
+                        },
+                        {
+                            "role": "user",  
+                            "content": f"Enhance this {scene_type} scene for cinematic impact: {scene_description}"
+                        }
+                    ],
+                    response_format={"type": "json_object"},
+                    timeout=8.0  # 8 second timeout
+                )
+                
+                enhanced_data = json.loads(response.choices[0].message.content)
+                signal.alarm(0)  # Cancel timeout
+                return enhanced_data
+                
+            except (TimeoutError, Exception) as api_error:
+                signal.alarm(0)  # Cancel timeout
+                logging.warning(f"OpenAI API failed: {api_error}")
+                raise api_error
             
         except Exception as e:
             logging.warning(f"AI scene enhancement failed: {e}")
@@ -206,34 +224,9 @@ class VideoGenerator:
             print("🎨 Generating AI scene images...")
             ai_scenes = []
             
-            for i, scene in enumerate(enhanced_scenes[:3]):  # Limit to first 3 scenes for demo
-                try:
-                    visual_prompt = scene['enhanced']['visual_prompt']
-                    
-                    # Generate image with DALL-E
-                    response = self.openai_client.images.generate(
-                        model="dall-e-3",
-                        prompt=f"Cinematic scene: {visual_prompt}, "
-                               f"professional film quality, dramatic composition, "
-                               f"high contrast lighting, epic atmosphere",
-                        size="1024x1024",
-                        quality="hd"
-                    )
-                    
-                    image_url = response.data[0].url
-                    ai_scenes.append({
-                        'scene_index': i,
-                        'image_url': image_url,
-                        'prompt': visual_prompt
-                    })
-                    
-                    print(f"🖼️ Generated AI image for scene {i+1}")
-                    time.sleep(2)  # Rate limiting
-                    
-                except Exception as scene_error:
-                    logging.warning(f"Failed to generate image for scene {i}: {scene_error}")
-                    continue
-            
+            # Skip image generation for production to avoid timeouts
+            # This can be enabled with feature flag later
+            print("⚡ Skipping AI image generation for production performance")
             return ai_scenes
             
         except Exception as e:

@@ -23,10 +23,24 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:/
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "pool_timeout": 20,
+    "max_overflow": 0,
 }
+
+# Production configuration
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB max file size
 
 # Initialize the app with the extension
 db.init_app(app)
+
+# Initialize production error handling
+from error_handler import error_handler
+error_handler.init_app(app)
+
+# Apply production configuration
+from production_config import config
+config.apply_to_app(app)
 
 # Create directories for static files
 os.makedirs('static/audio', exist_ok=True)

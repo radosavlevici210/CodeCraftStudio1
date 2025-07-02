@@ -73,19 +73,48 @@ def generate():
                 flash("Theme must be at least 3 characters long", "error")
                 return render_template('generate.html')
             
-            # Generate content
+            # Generate content with production timeout
             try:
                 log_security_event("GENERATION_REQUEST", f"Theme: {theme}, Title: {title}")
                 
-                # Use AI agent to generate complete content
-                result = ai_agent.generate_complete_content(theme, title)
+                # Add production timeout wrapper
+                import signal
                 
-                flash("Generation completed successfully!", "success")
-                return redirect(url_for('results', generation_id=result['id']))
+                def timeout_handler(signum, frame):
+                    raise TimeoutError("Generation timed out")
+                
+                signal.signal(signal.SIGALRM, timeout_handler)
+                signal.alarm(25)  # 25 second total timeout
+                
+                try:
+                    # Use AI agent to generate complete content
+                    result = ai_agent.generate_complete_content(theme, title)
+                    signal.alarm(0)  # Cancel timeout
+                    
+                    flash("Generation completed successfully!", "success")
+                    return redirect(url_for('results', generation_id=result['id']))
+                    
+                except TimeoutError:
+                    signal.alarm(0)
+                    log_security_event("GENERATION_TIMEOUT", f"Theme: {theme}")
+                    flash("Generation timed out. Please try a simpler theme.", "warning")
+                    return render_template('generate.html')
+                    
+                except Exception as gen_error:
+                    signal.alarm(0)
+                    raise gen_error
                 
             except Exception as e:
                 log_security_event("GENERATION_PROCESS_ERROR", str(e), "ERROR")
-                flash(f"Generation failed: {str(e)}", "error")
+                
+                # Provide user-friendly error messages
+                if "timeout" in str(e).lower():
+                    flash("Generation timed out. Please try again with a simpler theme.", "warning")
+                elif "api" in str(e).lower():
+                    flash("AI service temporarily unavailable. Please try again.", "warning")
+                else:
+                    flash("Generation failed. Please try again.", "error")
+                    
                 return render_template('generate.html')
         
         # GET request - show form
@@ -175,7 +204,13 @@ def gallery():
 def health():
     """System health endpoint"""
     try:
-        health_data = ai_agent.monitor_system_health()
+        from health_monitor import health_monitor
+        health_data = health_monitor.get_health_status()
+        
+        # Also get AI agent health
+        ai_health = ai_agent.monitor_system_health()
+        health_data['ai_system'] = ai_health
+        
         return jsonify(health_data)
     except Exception as e:
         log_security_event("HEALTH_CHECK_ERROR", str(e), "ERROR")
