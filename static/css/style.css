@@ -505,3 +505,325 @@ body {
 .spinner-border.text-gold {
     color: var(--gold) !important;
 }
+/* CodeCraft Studio - Custom Styles */
+/* © 2025 Ervin Remus Radosavlevici */
+
+:root {
+    --primary-color: #6f42c1;
+    --secondary-color: #fd7e14;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+    font-weight: 600;
+}
+
+.btn {
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--success-color), #20c997);
+    border: none;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(111, 66, 193, 0.25);
+}
+
+.progress {
+    height: 10px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 10px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+.badge {
+    border-radius: 20px;
+    font-size: 0.8em;
+    padding: 0.5em 1em;
+}
+
+/* Generation Results */
+.generation-result {
+    border-radius: 15px;
+    padding: 20px;
+    margin: 15px 0;
+    background: rgba(255, 255, 255, 0.95);
+    border-left: 5px solid var(--primary-color);
+}
+
+.audio-player {
+    width: 100%;
+    border-radius: 10px;
+    outline: none;
+}
+
+.video-player {
+    width: 100%;
+    height: 400px;
+    border-radius: 15px;
+    object-fit: cover;
+}
+
+/* Status indicators */
+.status-healthy {
+    color: var(--success-color);
+}
+
+.status-warning {
+    color: var(--warning-color);
+}
+
+.status-error {
+    color: var(--danger-color);
+}
+
+/* Loading animations */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Generation progress styles */
+.generation-progress {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.generation-progress h5 {
+    margin-bottom: 15px;
+}
+
+.progress-steps {
+    list-style: none;
+    padding: 0;
+}
+
+.progress-steps li {
+    padding: 5px 0;
+    position: relative;
+    padding-left: 30px;
+}
+
+.progress-steps li::before {
+    content: '⏳';
+    position: absolute;
+    left: 0;
+}
+
+.progress-steps li.completed::before {
+    content: '✅';
+}
+
+.progress-steps li.current::before {
+    content: '🔄';
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .card {
+        margin: 10px 0;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .video-player {
+        height: 250px;
+    }
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Gallery styles */
+.generation-card {
+    transition: transform 0.3s ease;
+}
+
+.generation-card:hover {
+    transform: translateY(-5px);
+}
+
+.generation-thumbnail {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Error pages */
+.error-page {
+    text-align: center;
+    padding: 60px 0;
+}
+
+.error-page h1 {
+    font-size: 6rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.error-page h2 {
+    color: var(--dark-color);
+    margin-bottom: 30px;
+}
+
+/* Health status */
+.health-metric {
+    text-align: center;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.health-metric h3 {
+    margin: 0;
+    font-size: 2rem;
+}
+
+.health-metric p {
+    margin: 5px 0 0 0;
+    font-weight: 500;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
+}
+
+/* Background animation */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    z-index: -1;
+    opacity: 0.1;
+}
+
+/* Security badge */
+.security-badge {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    z-index: 1000;
+}
+
+.security-badge i {
+    color: #00ff00;
+    margin-right: 5px;
+}

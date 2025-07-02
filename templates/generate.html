@@ -178,3 +178,185 @@ document.getElementById('generateForm').addEventListener('submit', function(e) {
 });
 </script>
 {% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Generate - CodeCraft Studio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h1 class="display-5"><i class="fas fa-magic"></i> AI Content Generation</h1>
+            <p class="lead">Transform your ideas into professional music and cinematic videos</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0"><i class="fas fa-wand-magic-sparkles"></i> Content Generator</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="contentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="theme" class="form-label">
+                                    <i class="fas fa-lightbulb"></i> Theme *
+                                </label>
+                                <input type="text" class="form-control" id="theme" name="theme" 
+                                       placeholder="e.g., Epic Battle, Sacred Journey, Dark Fantasy" required>
+                                <div class="form-text">Describe the main theme or mood</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading"></i> Title (Optional)
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="e.g., Invictus Aeternum">
+                                <div class="form-text">Custom title for your creation</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="voice_style" class="form-label">
+                                    <i class="fas fa-microphone"></i> Voice Style
+                                </label>
+                                <select class="form-select" id="voice_style" name="voice_style">
+                                    <option value="heroic_male">Heroic Male - Deep, powerful voice</option>
+                                    <option value="soprano">Soprano - High, clear female voice</option>
+                                    <option value="choir">Choir - Full harmonies</option>
+                                    <option value="whisper">Whisper - Intimate, dramatic</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="music_style" class="form-label">
+                                    <i class="fas fa-music"></i> Music Style
+                                </label>
+                                <select class="form-select" id="music_style" name="music_style">
+                                    <option value="epic">Epic Orchestral - Full symphony</option>
+                                    <option value="dark">Dark Orchestral - Brooding, minor keys</option>
+                                    <option value="emotional">Emotional - Heartfelt ballad</option>
+                                    <option value="pop">Modern Pop - Contemporary arrangement</option>
+                                    <option value="gregorian">Gregorian - Sacred chant</option>
+                                    <option value="fantasy">Fantasy - Magical elements</option>
+                                    <option value="gladiator">Gladiator - Battle drums</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-info-circle"></i> AI Features</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="enhance_lyrics" checked>
+                                                <label class="form-check-label" for="enhance_lyrics">
+                                                    AI-Enhanced Lyrics
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="cinematic_video" checked>
+                                                <label class="form-check-label" for="cinematic_video">
+                                                    Cinematic Video
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="voice_effects" checked>
+                                                <label class="form-check-label" for="voice_effects">
+                                                    Professional Voice FX
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-5">
+                            <i class="fas fa-rocket"></i> Generate Content
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Examples Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-star"></i> Example Themes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="example-theme" onclick="setTheme('Epic Champion Rises')">
+                            <h6>Epic Champion</h6>
+                            <p class="small text-muted">Heroic journey with triumphant orchestral music</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="example-theme" onclick="setTheme('Sacred Temple Divine Light')">
+                            <h6>Sacred Temple</h6>
+                            <p class="small text-muted">Spiritual atmosphere with Gregorian influences</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="example-theme" onclick="setTheme('Dark Fantasy Shadow Realm')">
+                            <h6>Dark Fantasy</h6>
+                            <p class="small text-muted">Mysterious and brooding with dramatic elements</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.example-theme {
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.example-theme:hover {
+    background: rgba(111, 66, 193, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+</style>
+
+<script>
+function setTheme(theme) {
+    document.getElementById('theme').value = theme;
+    document.getElementById('theme').focus();
+}
+</script>
+{% endblock %}

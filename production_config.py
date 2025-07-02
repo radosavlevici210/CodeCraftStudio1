@@ -84,3 +84,86 @@ class ProductionConfig:
 
 # Global configuration instance
 config = ProductionConfig()
+"""
+Production Configuration for CodeCraft Studio
+Enterprise-grade settings for production deployment
+© 2025 Ervin Remus Radosavlevici
+"""
+
+import os
+import logging
+from datetime import timedelta
+
+class ProductionConfig:
+    """Production configuration settings"""
+    
+    # Security Settings
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'rados-quantum-enforcement-v2.7-production')
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = 3600
+    
+    # Database Configuration
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///instance/codecraft_studio.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+        'pool_timeout': 20,
+        'max_overflow': 0
+    }
+    
+    # Performance Settings
+    SEND_FILE_MAX_AGE_DEFAULT = timedelta(hours=1)
+    MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB max file size
+    
+    # Session Configuration
+    PERMANENT_SESSION_LIFETIME = timedelta(hours=24)
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # OpenAI Configuration
+    OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+    OPENAI_MODEL = 'gpt-4o'
+    
+    # File Upload Settings
+    UPLOAD_FOLDER = 'static/uploads'
+    ALLOWED_EXTENSIONS = {'txt', 'json', 'wav', 'mp3', 'mp4'}
+    
+    # Rate Limiting
+    RATELIMIT_STORAGE_URL = 'memory://'
+    RATELIMIT_DEFAULT = "100 per hour"
+    
+    # Logging Configuration
+    LOG_LEVEL = logging.INFO
+    LOG_FILE = 'logs/application.log'
+    
+    @staticmethod
+    def apply_to_app(app):
+        """Apply production configuration to Flask app"""
+        app.config.from_object(ProductionConfig)
+        
+        # Configure logging
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        
+        logging.basicConfig(
+            level=ProductionConfig.LOG_LEVEL,
+            format='%(asctime)s %(levelname)s: %(message)s',
+            handlers=[
+                logging.FileHandler(ProductionConfig.LOG_FILE),
+                logging.StreamHandler()
+            ]
+        )
+        
+        # Security headers
+        @app.after_request
+        def add_security_headers(response):
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            response.headers['X-Frame-Options'] = 'DENY'
+            response.headers['X-XSS-Protection'] = '1; mode=block'
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+            response.headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' 'unsafe-eval'"
+            return response
+        
+        return app

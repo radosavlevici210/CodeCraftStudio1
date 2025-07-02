@@ -12,3 +12,58 @@ This software and its derivatives are declared as:
 Violators will be reported and prosecuted under digital theft policies.
 
 © 2025 Ervin Remus Radosavlevici — All rights reserved.
+# Radosavlevici Game License v1.0
+
+© 2025 Ervin Remus Radosavlevici. All rights reserved.
+
+## Terms and Conditions
+
+This software and all associated files, code, documentation, and derivative works are the exclusive intellectual property of Ervin Remus Radosavlevici.
+
+### Permitted Use
+- Personal, non-commercial use for educational purposes
+- Running the software as intended on authorized platforms
+- Viewing and studying the code for learning purposes
+
+### Prohibited Activities
+- Commercial use without explicit written permission
+- Redistribution, copying, or sharing of code or assets
+- Reverse engineering or creating derivative works
+- Removing or modifying copyright notices
+- Claiming ownership or authorship
+- Using the software for competitive products
+- AI training or machine learning without permission
+
+### Protection Mechanisms
+This software is protected by:
+- RADOS Quantum Enforcement Policy v2.7
+- International copyright law
+- Digital watermarking and identification systems
+- Real-time monitoring and detection systems
+- UK Intellectual Property Law
+- GDPR compliance requirements
+- DMCA protection protocols
+
+### Enforcement
+Violations of this license will result in:
+- Immediate cease and desist orders
+- Legal action under applicable laws
+- Compensation claims for damages
+- Reporting to relevant authorities
+- Permanent ban from use
+
+### Attribution
+Any permitted use must include proper attribution:
+"CodeCraft Studio © 2025 Ervin Remus Radosavlevici"
+
+### Contact
+For licensing inquiries: radosavlevici210@icloud.com
+
+### Jurisdiction
+This license is governed by UK law and international copyright treaties.
+
+---
+
+**NOTICE**: This software contains advanced AI systems and proprietary algorithms developed exclusively by Ervin Remus Radosavlevici. Unauthorized use, copying, or distribution is strictly prohibited and will be prosecuted to the full extent of the law.
+
+**RADOS PROTECTION**: This software is protected by RADOS Quantum Enforcement Policy v2.7, which provides real-time monitoring, threat detection, and automated protection against unauthorized access or copying.

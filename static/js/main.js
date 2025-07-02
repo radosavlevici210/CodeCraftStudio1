@@ -230,3 +230,323 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('© 2025 Ervin Remus Radosavlevici');
     console.log('Protected by RADOS Quantum Enforcement Policy v2.7');
 });
+// CodeCraft Studio - Main JavaScript
+// © 2025 Ervin Remus Radosavlevici
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎵 CodeCraft Studio - AI Music & Video Generator');
+    console.log('© 2025 Ervin Remus Radosavlevici');
+    console.log('Protected by RADOS Quantum Enforcement Policy v2.7');
+    
+    initializeApp();
+});
+
+function initializeApp() {
+    const generateForm = document.getElementById('generateForm');
+    if (generateForm) {
+        setupGenerationForm();
+    }
+    
+    setupGlobalEventListeners();
+    setupSecurityMonitoring();
+}
+
+function setupGenerationForm() {
+    const form = document.getElementById('generateForm');
+    const generateBtn = document.getElementById('generateBtn');
+    const progressSection = document.getElementById('progressSection');
+    const resultsSection = document.getElementById('resultsSection');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        startGeneration();
+    });
+    
+    async function startGeneration() {
+        // Disable form and show progress
+        generateBtn.disabled = true;
+        progressSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+        
+        // Get form data
+        const formData = new FormData(form);
+        
+        try {
+            // Start progress animation
+            animateProgress();
+            
+            // Submit generation request
+            const response = await fetch('/generate', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showGenerationResults(result);
+            } else {
+                showError(result.error || 'Generation failed');
+            }
+        } catch (error) {
+            showError('Network error: ' + error.message);
+        } finally {
+            // Re-enable form
+            generateBtn.disabled = false;
+            progressSection.style.display = 'none';
+        }
+    }
+    
+    function animateProgress() {
+        const progressBar = document.querySelector('.progress-bar');
+        const progressText = document.getElementById('progressText');
+        
+        const steps = [
+            'Initializing AI systems...',
+            'Analyzing theme and style...',
+            'Generating lyrics with OpenAI...',
+            'Creating musical composition...',
+            'Synthesizing voice elements...',
+            'Rendering cinematic video...',
+            'Applying final effects...',
+            'Completing generation...'
+        ];
+        
+        let currentStep = 0;
+        const stepDuration = 3000; // 3 seconds per step
+        
+        const interval = setInterval(() => {
+            if (currentStep < steps.length) {
+                const progress = ((currentStep + 1) / steps.length) * 100;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = steps[currentStep];
+                currentStep++;
+            } else {
+                clearInterval(interval);
+            }
+        }, stepDuration);
+    }
+    
+    function showGenerationResults(result) {
+        const resultsContent = document.getElementById('resultsContent');
+        
+        resultsContent.innerHTML = `
+            <div class="generation-result">
+                <h5><i class="fas fa-music"></i> Generation Complete!</h5>
+                <p><strong>Voice Style:</strong> ${result.voice_style}</p>
+                <p><strong>Music Style:</strong> ${result.music_style}</p>
+                
+                ${result.audio_file ? `
+                    <div class="mt-3">
+                        <label class="form-label"><i class="fas fa-headphones"></i> Audio</label>
+                        <audio controls class="audio-player">
+                            <source src="/static/audio/${result.audio_file}" type="audio/mpeg">
+                            Your browser does not support audio playback.
+                        </audio>
+                    </div>
+                ` : ''}
+                
+                ${result.video_file ? `
+                    <div class="mt-3">
+                        <label class="form-label"><i class="fas fa-video"></i> Video</label>
+                        <video controls class="video-player">
+                            <source src="/static/video/${result.video_file}" type="video/mp4">
+                            Your browser does not support video playback.
+                        </video>
+                    </div>
+                ` : ''}
+                
+                <div class="mt-3">
+                    <a href="/results/${result.generation_id}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                    ${result.audio_file ? `
+                        <a href="/download/audio/${result.generation_id}" class="btn btn-success ms-2">
+                            <i class="fas fa-download"></i> Download Audio
+                        </a>
+                    ` : ''}
+                    ${result.video_file ? `
+                        <a href="/download/video/${result.generation_id}" class="btn btn-info ms-2">
+                            <i class="fas fa-download"></i> Download Video
+                        </a>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        resultsSection.style.display = 'block';
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function showError(message) {
+        const resultsContent = document.getElementById('resultsContent');
+        resultsContent.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Generation Failed:</strong> ${message}
+                <div class="mt-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="location.reload()">
+                        <i class="fas fa-refresh"></i> Try Again
+                    </button>
+                </div>
+            </div>
+        `;
+        resultsSection.style.display = 'block';
+    }
+}
+
+function setupGlobalEventListeners() {
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }
+        }, 5000);
+    });
+    
+    // Smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Add loading states to buttons
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.addEventListener('click', function() {
+            if (!this.disabled) {
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="loading-spinner"></span> Processing...';
+                this.disabled = true;
+                
+                // Re-enable after timeout (fallback)
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }, 30000);
+            }
+        });
+    });
+}
+
+function setupSecurityMonitoring() {
+    // Add security badge
+    const securityBadge = document.createElement('div');
+    securityBadge.className = 'security-badge';
+    securityBadge.innerHTML = '<i class="fas fa-shield-alt"></i> RADOS Protected';
+    document.body.appendChild(securityBadge);
+    
+    // Monitor for suspicious activity
+    let activityCount = 0;
+    const activityLimit = 100;
+    
+    document.addEventListener('click', function() {
+        activityCount++;
+        if (activityCount > activityLimit) {
+            console.warn('High activity detected - RADOS monitoring active');
+        }
+    });
+    
+    // Prevent common attacks
+    document.addEventListener('keydown', function(e) {
+        // Prevent F12 (dev tools) in production
+        if (e.key === 'F12' && window.location.hostname !== 'localhost') {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Prevent Ctrl+Shift+I (dev tools)
+        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Disable right-click context menu in production
+    if (window.location.hostname !== 'localhost') {
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    }
+}
+
+// Utility functions
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 3000);
+}
+
+function formatDuration(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function copyToClipboard(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied to clipboard!', 'success');
+        });
+    } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showToast('Copied to clipboard!', 'success');
+    }
+}
+
+// Health monitoring
+function checkSystemHealth() {
+    fetch('/health')
+        .then(response => response.json())
+        .then(data => {
+            const healthIndicator = document.querySelector('.health-indicator');
+            if (healthIndicator) {
+                healthIndicator.className = `health-indicator status-${data.status}`;
+                healthIndicator.title = `System Status: ${data.status}`;
+            }
+        })
+        .catch(error => {
+            console.warn('Health check failed:', error);
+        });
+}
+
+// Initialize health monitoring
+setInterval(checkSystemHealth, 60000); // Check every minute
+
+// Export functions for global access
+window.CodeCraftStudio = {
+    showToast,
+    formatDuration,
+    copyToClipboard,
+    checkSystemHealth
+};

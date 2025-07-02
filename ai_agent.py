@@ -533,6 +533,53 @@ class InvictusAIAgent:
             'rados_protection': 'Active',
             'owner': 'Ervin Remus Radosavlevici'
         }
+    
+    def get_generation_statistics(self):
+        """Get comprehensive generation statistics"""
+        from models import Generation
+        from app import db
+        
+        try:
+            total_generations = db.session.query(Generation).count()
+            successful_generations = db.session.query(Generation).filter_by(status='completed').count()
+            failed_generations = db.session.query(Generation).filter_by(status='failed').count()
+            
+            # Calculate average duration for completed generations
+            completed_gens = db.session.query(Generation).filter(
+                Generation.status == 'completed',
+                Generation.completed_at.isnot(None)
+            ).all()
+            
+            avg_duration = 0
+            if completed_gens:
+                durations = [(gen.completed_at - gen.created_at).total_seconds() for gen in completed_gens]
+                avg_duration = sum(durations) / len(durations)
+            
+            # Count unique themes
+            unique_themes = db.session.query(Generation.theme).distinct().count()
+            
+            return {
+                'total_generations': total_generations,
+                'successful_generations': successful_generations,
+                'failed_generations': failed_generations,
+                'success_rate': (successful_generations / total_generations * 100) if total_generations > 0 else 0,
+                'average_duration': round(avg_duration, 1),
+                'unique_themes': unique_themes,
+                'ai_learning_active': True,
+                'generation_count': self.generation_count
+            }
+        except Exception as e:
+            log_security_event("STATS_ERROR", str(e), "ERROR")
+            return {
+                'total_generations': 0,
+                'successful_generations': 0,
+                'failed_generations': 0,
+                'success_rate': 0,
+                'average_duration': 0,
+                'unique_themes': 0,
+                'ai_learning_active': True,
+                'generation_count': self.generation_count
+            }
 
 # Global AI agent instance
 invictus_ai = InvictusAIAgent()
