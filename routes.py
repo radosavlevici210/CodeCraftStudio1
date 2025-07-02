@@ -4,16 +4,25 @@ Handles all web requests and API endpoints
 © 2025 Ervin Remus Radosavlevici
 """
 
-from flask import render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask import render_template, request, redirect, url_for, flash, send_file, jsonify, session
 from app import app, db
 from models import Generation, SecurityLog
 from ai_agent import InvictusAIAgent
+from youtube_uploader import YouTubeUploader
+from collaboration_system import collaboration_system
+from advanced_audio_mixer import AdvancedAudioMixer
+from voice_training_system import VoiceTrainingSystem
 from security.rados_security import log_security_event, enforce_rados_protection
 import os
+import json
+import uuid
 import logging
 
-# Initialize AI Agent
+# Initialize all systems
 ai_agent = InvictusAIAgent()
+youtube_uploader = YouTubeUploader()
+audio_mixer = AdvancedAudioMixer()
+voice_trainer = VoiceTrainingSystem()
 
 @app.route('/')
 def index():
