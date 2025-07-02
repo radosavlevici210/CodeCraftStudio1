@@ -24,9 +24,60 @@ def generate_lyrics(theme, title="Invictus Aeternum"):
     try:
         log_security_event("LYRICS_GENERATION_START", f"Theme: {theme}, Title: {title}")
         
-        # Always use fallback to prevent blocking
-        log_security_event("LYRICS_GENERATION_FALLBACK", "Using optimized fallback for performance")
-        return _get_fallback_lyrics(theme, title)
+        if not openai_client:
+            log_security_event("LYRICS_GENERATION_FALLBACK", "Using fallback lyrics - OpenAI not available")
+            return _get_fallback_lyrics(theme, title)
+        
+        prompt = f"""
+        Generate powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
+        
+        The lyrics should be:
+        - Epic and inspiring
+        - Suitable for orchestral/cinematic music
+        - Include verses, chorus, and bridge sections
+        - Have timing information for video synchronization
+        - Include Latin phrases where appropriate for grandeur
+        
+        Return the response as JSON with this structure:
+        {{
+            "title": "{title}",
+            "theme": "{theme}",
+            "full_text": "complete lyrics as one string",
+            "verses": [
+                {{
+                    "type": "verse",
+                    "lyrics": "verse lyrics here",
+                    "timing": "0:30"
+                }},
+                {{
+                    "type": "chorus", 
+                    "lyrics": "chorus lyrics here",
+                    "timing": "0:30-1:00"
+                }}
+            ],
+            "structure": ["verse", "chorus", "verse", "chorus", "bridge", "chorus"],
+            "mood": "heroic/epic/emotional",
+            "latin_phrases": ["phrase1", "phrase2"]
+        }}
+        """
+        
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a professional lyricist specializing in epic, cinematic music. Generate lyrics that are suitable for orchestral arrangements and video synchronization."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=1500,
+            timeout=15
+        )
+        
+        if response.choices[0].message.content:
+            lyrics_data = json.loads(response.choices[0].message.content)
+            log_security_event("LYRICS_GENERATION_SUCCESS", f"Generated lyrics for: {title}")
+            return lyrics_data
+        else:
+            raise Exception("Empty response from OpenAI")
         
     except Exception as e:
         log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
