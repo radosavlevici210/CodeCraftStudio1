@@ -17,7 +17,12 @@ class YouTubeUploader:
     """Professional YouTube upload and management system"""
     
     def __init__(self):
-        self.openai_client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if api_key:
+            self.openai_client = OpenAI(api_key=api_key)
+        else:
+            self.openai_client = None
+            logging.warning("OpenAI API key not found. AI features will be limited.")
         
         # YouTube upload configurations
         self.upload_configs = {
@@ -107,29 +112,36 @@ class YouTubeUploader:
             music_style = generation_data.get('music_style', 'epic')
             lyrics_data = generation_data.get('lyrics_data', {})
             
-            # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
-            # do not change this unless explicitly requested by the user
-            response = self.openai_client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are a professional YouTube content strategist and SEO expert. "
-                                   "Create compelling YouTube metadata for AI-generated music videos. "
-                                   "Focus on discovery, engagement, and professional presentation. "
-                                   "Respond with JSON containing: title, description, tags, and seo_keywords."
-                    },
-                    {
-                        "role": "user",
-                        "content": f"Create YouTube metadata for this AI-generated music: "
-                                   f"Title: {title}, Theme: {theme}, Style: {music_style}, "
-                                   f"Lyrics preview: {str(lyrics_data)[:200]}..."
-                    }
-                ],
-                response_format={"type": "json_object"}
-            )
-            
-            ai_metadata = json.loads(response.choices[0].message.content)
+            if not self.openai_client:
+                log_security_event("YOUTUBE_METADATA_FALLBACK", "Using fallback metadata - OpenAI not available")
+                ai_metadata = self._get_fallback_metadata(title, theme, music_style)
+            else:
+                # the newest OpenAI model is "gpt-4o" which was released May 13, 2024. 
+                # do not change this unless explicitly requested by the user
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a professional YouTube content strategist and SEO expert. "
+                                       "Create compelling YouTube metadata for AI-generated music videos. "
+                                       "Focus on discovery, engagement, and professional presentation. "
+                                       "Respond with JSON containing: title, description, tags, and seo_keywords."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Create YouTube metadata for this AI-generated music: "
+                                       f"Title: {title}, Theme: {theme}, Style: {music_style}, "
+                                       f"Lyrics preview: {str(lyrics_data)[:200]}..."
+                        }
+                    ],
+                    response_format={"type": "json_object"}
+                )
+                
+                if response.choices[0].message.content:
+                    ai_metadata = json.loads(response.choices[0].message.content)
+                else:
+                    ai_metadata = self._get_fallback_metadata(title, theme, music_style)
             
             # Enhance with studio branding
             enhanced_metadata = {
@@ -204,6 +216,10 @@ class YouTubeUploader:
             theme = generation_data.get('theme', 'Epic Journey')
             style = generation_data.get('music_style', 'epic')
             
+            if not self.openai_client:
+                log_security_event("THUMBNAIL_GENERATION_FALLBACK", "Using fallback thumbnail - OpenAI not available")
+                return self._get_fallback_thumbnail(theme, style)
+            
             # Generate thumbnail using DALL-E
             response = self.openai_client.images.generate(
                 model="dall-e-3",
@@ -214,14 +230,16 @@ class YouTubeUploader:
                 quality="hd"
             )
             
-            thumbnail_data = {
-                'url': response.data[0].url,
-                'style': style,
-                'theme': theme,
-                'generated_at': datetime.utcnow().isoformat()
-            }
-            
-            return thumbnail_data
+            if response.data and len(response.data) > 0:
+                thumbnail_data = {
+                    'url': response.data[0].url,
+                    'style': style,
+                    'theme': theme,
+                    'generated_at': datetime.utcnow().isoformat()
+                }
+                return thumbnail_data
+            else:
+                return self._get_fallback_thumbnail(theme, style)
             
         except Exception as e:
             logging.warning(f"Custom thumbnail generation failed: {e}")
@@ -330,6 +348,31 @@ class YouTubeUploader:
         except Exception as e:
             log_security_event("YOUTUBE_SCHEDULE_ERROR", str(e), "ERROR")
             raise e
+    
+    def _get_fallback_metadata(self, title, theme, style):
+        """Generate fallback metadata when AI is not available"""
+        return {
+            'title': f'{title} - {theme} | CodeCraft Studio',
+            'description': f'AI-generated {style} music with cinematic video. Theme: {theme}. '
+                          f'Created with CodeCraft Studio\'s advanced AI music generation system. '
+                          f'Professional orchestral composition with synchronized visuals.',
+            'tags': ['AI Music', 'Generated Music', 'CodeCraft Studio', style, 'Cinematic', 
+                    'Orchestral', 'Epic Music', theme.replace(' ', '')],
+            'seo_keywords': [f'{style} music', 'AI generated', 'cinematic', 'orchestral'],
+            'category': 'Music',
+            'language': 'en',
+            'ai_generated': True
+        }
+    
+    def _get_fallback_thumbnail(self, theme, style):
+        """Generate fallback thumbnail data when AI is not available"""
+        return {
+            'url': None,
+            'type': 'fallback',
+            'description': f'CodeCraft Studio - {theme} ({style})',
+            'dimensions': '1280x720',
+            'generated_at': datetime.utcnow().isoformat()
+        }
     
     def batch_upload(self, packages):
         """Handle batch upload of multiple videos"""

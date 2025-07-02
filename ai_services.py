@@ -12,13 +12,21 @@ from security.rados_security import log_security_event
 
 # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
 # do not change this unless explicitly requested by the user
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "default_openai_key")
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+if OPENAI_API_KEY:
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
+else:
+    openai_client = None
+    logging.warning("OpenAI API key not found. AI features will be limited.")
 
 def generate_lyrics(theme, title="Invictus Aeternum"):
     """Generate lyrics based on theme using OpenAI"""
     try:
         log_security_event("LYRICS_GENERATION_START", f"Theme: {theme}, Title: {title}")
+        
+        if not openai_client:
+            log_security_event("LYRICS_GENERATION_FALLBACK", "Using fallback lyrics - OpenAI not available")
+            return _get_fallback_lyrics(theme, title)
         
         prompt = f"""
         Generate powerful, cinematic lyrics for a song titled "{title}" with the theme "{theme}".
@@ -63,40 +71,55 @@ def generate_lyrics(theme, title="Invictus Aeternum"):
             max_tokens=1500
         )
         
-        lyrics_data = json.loads(response.choices[0].message.content)
+        if response.choices[0].message.content:
+            lyrics_data = json.loads(response.choices[0].message.content)
+        else:
+            raise Exception("Empty response from OpenAI")
         log_security_event("LYRICS_GENERATION_SUCCESS", f"Generated lyrics for: {title}")
         
         return lyrics_data
         
     except Exception as e:
         log_security_event("LYRICS_GENERATION_ERROR", str(e), "ERROR")
-        # Return fallback lyrics
-        return {
-            "title": title,
-            "theme": theme,
-            "full_text": f"Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain, Our hearts ablaze, our spirits soar, We are the champions, forevermore.",
-            "verses": [
-                {
-                    "type": "verse",
-                    "lyrics": "Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain",
-                    "timing": "0:00-0:30"
-                },
-                {
-                    "type": "chorus",
-                    "lyrics": "Our hearts ablaze, our spirits soar, We are the champions, forevermore",
-                    "timing": "0:30-1:00"
-                }
-            ],
-            "structure": ["verse", "chorus"],
-            "mood": "heroic",
-            "latin_phrases": ["Invictus Aeternum"]
-        }
+        return _get_fallback_lyrics(theme, title)
+
+def _get_fallback_lyrics(theme, title):
+    """Return fallback lyrics when AI is not available"""
+    return {
+        "title": title,
+        "theme": theme,
+        "full_text": f"Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain, Our hearts ablaze, our spirits soar, We are the champions, forevermore.",
+        "verses": [
+            {
+                "type": "verse",
+                "lyrics": "Invictus Aeternum, we rise again, Through fire and fate, we conquer the pain",
+                "timing": "0:00-0:30"
+            },
+            {
+                "type": "chorus",
+                "lyrics": "Our hearts ablaze, our spirits soar, We are the champions, forevermore",
+                "timing": "0:30-1:00"
+            }
+        ],
+        "structure": ["verse", "chorus"],
+        "mood": "heroic",
+        "latin_phrases": ["Invictus Aeternum"]
+    }
 
 def enhance_music_prompt(lyrics_data, music_style):
     """Enhance music generation prompt using AI"""
     try:
         lyrics_text = lyrics_data.get('full_text', '')
         mood = lyrics_data.get('mood', 'heroic')
+        
+        if not openai_client:
+            log_security_event("MUSIC_ENHANCEMENT_FALLBACK", "Using fallback enhancement - OpenAI not available")
+            return {
+                "instrumentation": f"Full orchestra with {music_style} arrangement",
+                "tempo": "Moderate to fast",
+                "effects": "Reverb, chorus, orchestral processing",
+                "notes": f"Professional {music_style} production"
+            }
         
         prompt = f"""
         Create a detailed music production prompt for generating {music_style} music with these lyrics:
@@ -125,10 +148,12 @@ def enhance_music_prompt(lyrics_data, music_style):
             max_tokens=800
         )
         
-        enhancement_data = json.loads(response.choices[0].message.content)
-        log_security_event("MUSIC_ENHANCEMENT_SUCCESS", f"Enhanced prompt for {music_style}")
-        
-        return enhancement_data
+        if response.choices[0].message.content:
+            enhancement_data = json.loads(response.choices[0].message.content)
+            log_security_event("MUSIC_ENHANCEMENT_SUCCESS", f"Enhanced prompt for {music_style}")
+            return enhancement_data
+        else:
+            raise Exception("Empty response from OpenAI")
         
     except Exception as e:
         log_security_event("MUSIC_ENHANCEMENT_ERROR", str(e), "ERROR")
