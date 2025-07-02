@@ -14,11 +14,18 @@ from flask import Flask
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
+    from import_handler import check_production_dependencies, AUDIO_LIBS
     from app import create_app
     from production_config import ProductionConfig
+    
+    # Check dependencies on startup
+    if not check_production_dependencies():
+        logging.warning("Some dependencies missing - running in limited mode")
+    
 except ImportError as e:
-    print(f"Import error: {e}")
-    sys.exit(1)
+    print(f"Critical import error: {e}")
+    print("Starting in basic mode...")
+    # Don't exit, try to continue without optional features
 
 def main():
     """Main application entry point"""

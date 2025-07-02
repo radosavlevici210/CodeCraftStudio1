@@ -15,7 +15,12 @@ from datetime import datetime
 from security.rados_security import log_security_event
 from models import Generation
 from app import db
-import soundfile as sf
+try:
+    import soundfile
+    HAS_SOUNDFILE = True
+except ImportError:
+    HAS_SOUNDFILE = False
+    print("Warning: soundfile not available - audio features limited") as sf
 from pydub import AudioSegment
 from gtts import gTTS
 
